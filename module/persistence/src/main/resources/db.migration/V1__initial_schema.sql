@@ -1,9 +1,10 @@
 -- Enums
-CREATE TYPE challenge_status AS ENUM ('draft', 'validated', 'active', 'archived')
+CREATE TYPE challenge_status AS ENUM ('draft', 'validated', 'active', 'archived');
+CREATE TYPE difficulty AS ENUM ('easy', 'medium', 'hard');
 
 -- Shared trigger
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURN TRIGGER AS $$
+RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;

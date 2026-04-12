@@ -1,4 +1,4 @@
-package com.sbboakye.persistence
+package com.sbboakye.masel.persistence
 
 import cats.effect.Sync
 import cats.syntax.all.*
