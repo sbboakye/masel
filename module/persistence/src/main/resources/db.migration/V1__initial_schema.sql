@@ -27,6 +27,10 @@ CREATE TABLE challenges (
 
 CREATE INDEX idx_challenges_status ON challenges (status);
 
+CREATE TRIGGER trg_challenges_updated_at
+    BEFORE UPDATE ON challenges
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 -- Submission definitions
 CREATE TABLE submissions (
     id                  UUID PRIMARY KEY,
@@ -39,3 +43,7 @@ CREATE TABLE submissions (
 );
 
 CREATE INDEX idx_submissions_challenge_id ON submissions (challenge_id);
+
+CREATE TRIGGER trg_submissions_updated_at
+    BEFORE UPDATE ON submissions
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
