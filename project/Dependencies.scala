@@ -13,8 +13,8 @@ object Dependencies {
     val http4s = "0.23.34"
 
     // Database
-    val skunk = "0.6.5"
-    val flyway = "12.3.0"
+    val skunk = "1.0.0"
+    val flyway = "12.4.0"
     val postgresql = "42.7.10"
 
     // JSON
@@ -29,7 +29,7 @@ object Dependencies {
     val logback = "1.5.32"
 
     // Testing
-    val munit              = "1.2.4"
+    val munit              = "1.3.0"
     val munitCatsEffect    = "2.2.0"
     val scalaCheck         = "1.19.0"
     val testcontainers     = "0.44.1"
@@ -52,6 +52,7 @@ object Dependencies {
 
   // Database
   val skunkCore = "org.tpolecat" %% "skunk-core" % Versions.skunk
+  val skunkCirce = "org.tpolecat" %% "skunk-circe" % Versions.skunk
   val flyway              = "org.flywaydb"  % "flyway-core"           % Versions.flyway
   val flywayPostgres      = "org.flywaydb"  % "flyway-database-postgresql" % Versions.flyway
   val postgresql          = "org.postgresql" % "postgresql"            % Versions.postgresql
@@ -78,9 +79,9 @@ object Dependencies {
   val testcontainersMunit    = "com.dimafeng" %% "testcontainers-scala-munit"      % Versions.testcontainers % Test
 
   // Dependency groups
-  val coreDeps: Seq[ModuleID] = Seq(cats, catsEffect, fs2Core, fs2IO, ironCore, ironCirce, ironCiris)
+  val coreDeps: Seq[ModuleID] = Seq(cats, catsEffect, fs2Core, fs2IO, circeCore, circeGeneric, ironCore, ironCirce, ironCiris)
 
-  val persistenceDeps: Seq[ModuleID] = Seq(skunkCore, postgresql, flyway, flywayPostgres, log4catsSlf4j)
+  val persistenceDeps: Seq[ModuleID] = Seq(skunkCore, skunkCirce, postgresql, flyway, flywayPostgres, log4catsSlf4j)
 
   val apiDeps: Seq[ModuleID] = Seq(http4sEmberServer, http4sEmberClient, http4sCirce, http4sDsl)
 
