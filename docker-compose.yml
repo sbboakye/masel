@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_DB: masel
       POSTGRES_USER: masel
-      POSTGRES_PASSWORD: masel
+      POSTGRES_PASSWORD: maselmasel
     ports:
       - "5432:5432"
     volumes:

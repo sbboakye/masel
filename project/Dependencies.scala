@@ -43,6 +43,7 @@ object Dependencies {
   val ironCore = "io.github.iltotore" %% "iron" % Versions.iron
   val ironCirce = "io.github.iltotore" %% "iron-circe" % Versions.iron
   val ironCiris = "io.github.iltotore" %% "iron-ciris" % Versions.iron
+  val ironCats = "io.github.iltotore" %% "iron-cats" % Versions.iron
 
   // HTTP & API
   val http4sEmberServer = "org.http4s" %% "http4s-ember-server" % Versions.http4s
@@ -66,6 +67,8 @@ object Dependencies {
   // Config
   val ciris = "is.cir" %% "ciris" % Versions.ciris
   val cirisCirce = "is.cir" %% "ciris-circe" % Versions.ciris
+  val cirisEnumeratum = "is.cir" %% "ciris-enumeratum" % Versions.ciris
+  val cirisHttp4s = "is.cir" %% "ciris-http4s" % Versions.ciris
 
   // Logging
   val log4catsSlf4j = "org.typelevel" %% "log4cats-slf4j" % Versions.log4cats
@@ -87,7 +90,11 @@ object Dependencies {
 
   val engineDeps: Seq[ModuleID] = Seq(fs2Core, catsEffect, log4catsSlf4j)
 
-  val appDeps: Seq[ModuleID] = Seq(circeCore, circeGeneric, circeParser, circeYaml, ciris, cirisCirce, logback)
+  val appDeps: Seq[ModuleID] = Seq(
+    circeCore, circeGeneric, circeParser, circeYaml, ciris, cirisCirce, cirisEnumeratum,
+    cirisHttp4s, ironCiris, ironCats, logback,
+    http4sEmberServer, http4sEmberClient, http4sCirce, http4sDsl
+  )
 
   val testDeps: Seq[ModuleID] = Seq(munit, munitCatsEffect, scalaCheck, testcontainersMunit)
 
