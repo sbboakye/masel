@@ -20,8 +20,8 @@ object Submission:
   given Decoder[Submission] = deriveDecoder[Submission]
 
 case class SubmissionUpdate(
-                       id: SubmissionId,
-                       candidateSolution: String
+                       candidateSolution: String,
+                       id: SubmissionId
                      )
 
 object SubmissionUpdate:

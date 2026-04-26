@@ -45,13 +45,13 @@ object Challenge:
   given Decoder[Challenge] = deriveDecoder[Challenge]
 
 case class ChallengeUpdate(
-                            id: ChallengeId,
                             title: String,
                             instructions: String,
                             status: ChallengeStatus,
                             expectedSolution: String,
                             allottedTime: Int,
-                            difficulty: ChallengeDifficulty
+                            difficulty: ChallengeDifficulty,
+                            id: ChallengeId,
                           )
 
 object ChallengeUpdate:

@@ -1,4 +1,4 @@
-package com.sbboakye.masel.persistence.meta
+package com.sbboakye.masel.persistence.codec
 
 import skunk.*
 import skunk.codec.all.*
@@ -31,22 +31,7 @@ object SkunkCodec:
     timestamptz *:
     timestamptz
 
-  val challengeEncoder: Encoder[Challenge] =
-    challengeCodecTypes.values.contramap { (c: Challenge) =>
-      (c.id,
-        c.title,
-        c.instructions,
-        c.status,
-        c.expectedSolution,
-        c.output,
-        c.allottedTime,
-        c.difficulty,
-        c.createdAt,
-        c.updatedAt
-      )
-    }
-
-  val challengeDecoder: Decoder[Challenge] =
+  val challengeCodec: Codec[Challenge] =
     challengeCodecTypes.to[Challenge]
 
   val submissionCodecTypes = submissionId *:
@@ -57,17 +42,5 @@ object SkunkCodec:
     timestamptz *:
     timestamptz
 
-  val submissionEncoder: Encoder[Submission] =
-    submissionCodecTypes.values.contramap { (s: Submission) =>
-      (s.id,
-        s.challengeId,
-        s.candidateSolution,
-        s.output,
-        s.score,
-        s.createdAt,
-        s.updatedAt
-      )
-    }
-
-  val submissionDecoder: Decoder[Submission] =
+  val submissionCodec: Codec[Submission] =
     submissionCodecTypes.to[Submission]

@@ -1,7 +1,7 @@
 package com.sbboakye.masel.persistence.queries
 
 import com.sbboakye.masel.core.domain.{Submission, SubmissionId, SubmissionUpdate}
-import com.sbboakye.masel.persistence.meta.SkunkCodec.{submissionDecoder, submissionEncoder, submissionId}
+import com.sbboakye.masel.persistence.codec.SkunkCodec.{submissionCodec, submissionId}
 import cats.syntax.all.*
 import skunk.*
 import skunk.implicits.*
@@ -10,7 +10,7 @@ import skunk.codec.all.*
 
 object SubmissionQueries:
 
-  def findAll(limit: Int, offset: Int): Query[Void, Submission] =
+  def findAll: Query[(Int, Int), Submission] =
     sql"""
            SELECT
             id,
@@ -21,7 +21,9 @@ object SubmissionQueries:
             created_at,
             updated_at
            FROM submissions
-      """.query(submissionDecoder)
+           ORDER BY updated_at desc
+           LIMIT $int4 OFFSET $int4
+      """.query(submissionCodec)
 
   def findById: Query[SubmissionId, Submission] =
     sql"""
@@ -35,26 +37,27 @@ object SubmissionQueries:
             updated_at
            FROM submissions
            WHERE id = $submissionId
-      """.query(submissionDecoder)
+      """.query(submissionCodec)
 
-  def create: Command[Submission] =
+  def create: Query[Submission, Submission] =
     sql"""
         INSERT INTO submissions (id, challenge_id, candidate_solution, output, score, created_at, updated_at)
         VALUES (
-          $submissionEncoder
+          $submissionCodec
         )
-      """.command
+        RETURNING id, challenge_id, candidate_solution, output, score, created_at, updated_at
+      """.query(submissionCodec)
 
-  def update: Command[SubmissionUpdate] =
+  def update: Query[
+    (String, SubmissionId),
+    Submission
+  ] =
     sql"""
         UPDATE submissions
         SET
             candidate_solution = $text
         WHERE id = $submissionId
-      """.command
-      .contramap { (s: SubmissionUpdate) =>
-        (s.candidateSolution, s.id)
-      }
+      """.query(submissionCodec)
 
   def delete: Command[SubmissionId] =
     sql"""

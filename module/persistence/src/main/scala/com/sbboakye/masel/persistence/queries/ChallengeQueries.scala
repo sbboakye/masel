@@ -1,7 +1,7 @@
 package com.sbboakye.masel.persistence.queries
 
-import com.sbboakye.masel.core.domain.{Challenge, ChallengeId, ChallengeUpdate}
-import com.sbboakye.masel.persistence.meta.SkunkCodec.{challengeDecoder, challengeDifficulty, challengeEncoder, challengeId, challengeStatus}
+import com.sbboakye.masel.core.domain.{Challenge, ChallengeDifficulty, ChallengeId, ChallengeStatus, ChallengeUpdate}
+import com.sbboakye.masel.persistence.codec.SkunkCodec.{challengeCodec, challengeDifficulty, challengeId, challengeStatus}
 import cats.syntax.all.*
 import skunk.*
 import skunk.implicits.*
@@ -10,7 +10,7 @@ import skunk.codec.all.*
 
 object ChallengeQueries:
 
-  def findAll(limit: Int, offset: Int): Query[Void, Challenge] =
+  def findAll: Query[(Int, Int), Challenge] =
     sql"""
          SELECT
           id,
@@ -24,7 +24,9 @@ object ChallengeQueries:
           created_at,
           updated_at
          FROM challenges
-    """.query(challengeDecoder)
+         ORDER BY updated_at desc
+         LIMIT $int4 OFFSET $int4
+    """.query(challengeCodec)
 
   def findById: Query[ChallengeId, Challenge] =
     sql"""
@@ -41,17 +43,21 @@ object ChallengeQueries:
           updated_at
          FROM challenges
          WHERE id = $challengeId
-    """.query(challengeDecoder)
+    """.query(challengeCodec)
 
-  def create: Command[Challenge] =
+  def create: Query[Challenge, Challenge] =
     sql"""
       INSERT INTO challenges (id, title, instructions, status, expected_solution, output, allotted_time, difficulty, created_at, updated_at)
       VALUES (
-        $challengeEncoder
+        $challengeCodec
       )
-    """.command
+      RETURNING id, title, instructions, status, expected_solution, output, allotted_time, difficulty, created_at, updated_at
+    """.query(challengeCodec)
 
-  def update: Command[ChallengeUpdate] =
+  def update: Query[
+    (String, String, ChallengeStatus, String, Int, ChallengeDifficulty, ChallengeId), 
+    Challenge
+  ] =
     sql"""
       UPDATE challenges
       SET title = $varchar,
@@ -61,10 +67,8 @@ object ChallengeQueries:
           allotted_time = $int4,
           difficulty = $challengeDifficulty
       WHERE id = $challengeId
-    """.command
-      .contramap { (c: ChallengeUpdate) =>
-        (c.title, c.instructions, c.status, c.expectedSolution, c.allottedTime, c.difficulty, c.id)
-      }
+      RETURNING id, title, instructions, status, expected_solution, output, allotted_time, difficulty, created_at, updated_at
+    """.query(challengeCodec)
 
   def delete: Command[ChallengeId] =
     sql"""
