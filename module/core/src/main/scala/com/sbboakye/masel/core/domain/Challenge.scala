@@ -2,6 +2,7 @@ package com.sbboakye.masel.core.domain
 
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.*
+import io.github.iltotore.iron.circe.given
 
 import java.time.OffsetDateTime
 
@@ -29,12 +30,12 @@ object ChallengeDifficulty:
 
 case class Challenge(
                     id: ChallengeId,
-                    title: String,
-                    instructions: String,
+                    title: NonEmptyString,
+                    instructions: NonEmptyString,
                     status: ChallengeStatus,
-                    expectedSolution: String,
+                    expectedSolution: NonEmptyString,
                     output: Option[io.circe.Json],
-                    allottedTime: Int,
+                    allottedTime: PositiveInt,
                     difficulty: ChallengeDifficulty,
                     createdAt: OffsetDateTime,
                     updatedAt: OffsetDateTime
@@ -45,13 +46,13 @@ object Challenge:
   given Decoder[Challenge] = deriveDecoder[Challenge]
 
 case class ChallengeUpdate(
-                            title: String,
-                            instructions: String,
+                            title: NonEmptyString,
+                            instructions: NonEmptyString,
                             status: ChallengeStatus,
-                            expectedSolution: String,
-                            allottedTime: Int,
+                            expectedSolution: NonEmptyString,
+                            allottedTime: PositiveInt,
                             difficulty: ChallengeDifficulty,
-                            id: ChallengeId,
+                            id: ChallengeId
                           )
 
 object ChallengeUpdate:

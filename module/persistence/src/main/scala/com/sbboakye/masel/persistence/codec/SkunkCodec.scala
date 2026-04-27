@@ -2,17 +2,28 @@ package com.sbboakye.masel.persistence.codec
 
 import skunk.*
 import skunk.codec.all.*
-import com.sbboakye.masel.core.domain.{Challenge, ChallengeDifficulty, ChallengeId, ChallengeStatus, ChallengeUpdate, Submission, SubmissionId}
+import com.sbboakye.masel.core.domain.{Challenge, ChallengeDifficulty, ChallengeId, ChallengeStatus, ChallengeUpdate, NonEmptyString, PositiveInt, Score, Submission, SubmissionId}
 import skunk.circe.codec.all.*
 import skunk.data.Type
+import io.github.iltotore.iron.*
+import io.github.iltotore.iron.constraint.all.*
 
 object SkunkCodec:
+  private def refined[A, C](base: Codec[A])(using constraint: RuntimeConstraint[A, C]): Codec[A :| C] =
+    base.eimap[A :| C] { a =>
+      a.refineEither[C]
+    } {
+      identity
+    }
 
+  // challenge codecs
   val challengeId: Codec[ChallengeId] =
     uuid.imap(ChallengeId.apply)(ChallengeId.value)
 
-  val submissionId: Codec[SubmissionId] =
-    uuid.imap(SubmissionId.apply)(SubmissionId.value)
+  val challengeTitle: Codec[NonEmptyString] = refined[String, Not[Empty]](varchar)
+  val challengeInstructions: Codec[NonEmptyString] = refined[String, Not[Empty]](text)
+  val challengeExpectedSolutions: Codec[NonEmptyString] = refined[String, Not[Empty]](text)
+  val challengeAllottedTime: Codec[PositiveInt] = refined[Int, Positive](int4)
 
   val challengeStatus: Codec[ChallengeStatus] =
     `enum`[ChallengeStatus](_.toString.toLowerCase, ChallengeStatus.fromString, Type("challenge_status"))
@@ -21,12 +32,12 @@ object SkunkCodec:
     `enum`[ChallengeDifficulty](_.toString.toLowerCase, ChallengeDifficulty.fromString, Type("challenge_difficulty"))
 
   val challengeCodecTypes = challengeId *:
-    varchar *:
-    text *:
+    challengeTitle *:
+    challengeInstructions *:
     challengeStatus *:
-    text *:
+    challengeExpectedSolutions *:
     jsonb.opt *:
-    int4 *:
+    challengeAllottedTime *:
     challengeDifficulty *:
     timestamptz *:
     timestamptz
@@ -34,11 +45,17 @@ object SkunkCodec:
   val challengeCodec: Codec[Challenge] =
     challengeCodecTypes.to[Challenge]
 
+  // submission codecs
+  val submissionId: Codec[SubmissionId] =
+    uuid.imap(SubmissionId.apply)(SubmissionId.value)
+  val submissionSolution: Codec[NonEmptyString] = refined[String, Not[Empty]](text)
+  val submissionScore: Codec[Score] = refined[Int, (GreaterEqual[0] & LessEqual[100])](int4)
+
   val submissionCodecTypes = submissionId *:
     challengeId *:
-    text *:
+    submissionSolution *:
     jsonb.opt *:
-    int4.opt *:
+    submissionScore.opt *:
     timestamptz *:
     timestamptz
 

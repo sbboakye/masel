@@ -5,15 +5,12 @@ import cats.syntax.all.*
 import ciris.*
 import ciris.http4s.*
 import cats.effect.Async
-import io.github.iltotore.iron.*
-import io.github.iltotore.iron.constraint.all.*
+import com.comcast.ip4s.*
+import com.sbboakye.masel.core.domain.{DatabasePassword, NonEmptyString}
+import io.github.iltotore.iron.autoRefine
 import io.github.iltotore.iron.ciris.given
 import io.github.iltotore.iron.cats.given
-import com.comcast.ip4s.*
 
-type NonEmptyString = String :| Not[Empty]
-
-type DatabasePassword = String :| MinLength[8]
 
 case class DatabaseConfig(
                            jdbcUrl: NonEmptyString,

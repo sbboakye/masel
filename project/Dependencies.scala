@@ -82,7 +82,7 @@ object Dependencies {
   val testcontainersMunit    = "com.dimafeng" %% "testcontainers-scala-munit"      % Versions.testcontainers % Test
 
   // Dependency groups
-  val coreDeps: Seq[ModuleID] = Seq(cats, catsEffect, fs2Core, fs2IO, circeCore, circeGeneric, ironCore, ironCirce, ironCiris)
+  val coreDeps: Seq[ModuleID] = Seq(cats, catsEffect, fs2Core, fs2IO, circeCore, circeGeneric, ironCore, ironCirce, ironCiris, ironCats)
 
   val persistenceDeps: Seq[ModuleID] = Seq(skunkCore, skunkCirce, postgresql, flyway, flywayPostgres, log4catsSlf4j)
 
