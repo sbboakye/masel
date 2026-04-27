@@ -15,10 +15,10 @@ object SkunkCodec:
     uuid.imap(SubmissionId.apply)(SubmissionId.value)
 
   val challengeStatus: Codec[ChallengeStatus] =
-    `enum`[ChallengeStatus](_.toString.toLowerCase, ChallengeStatus.fromString, Type("chalengestatus"))
+    `enum`[ChallengeStatus](_.toString.toLowerCase, ChallengeStatus.fromString, Type("challenge_status"))
 
   val challengeDifficulty: Codec[ChallengeDifficulty] =
-    `enum`[ChallengeDifficulty](_.toString.toLowerCase, ChallengeDifficulty.fromString, Type("challengedifficulty"))
+    `enum`[ChallengeDifficulty](_.toString.toLowerCase, ChallengeDifficulty.fromString, Type("challenge_difficulty"))
 
   val challengeCodecTypes = challengeId *:
     varchar *:

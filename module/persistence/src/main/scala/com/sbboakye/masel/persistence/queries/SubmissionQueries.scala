@@ -57,6 +57,7 @@ object SubmissionQueries:
         SET
             candidate_solution = $text
         WHERE id = $submissionId
+        RETURNING id, challenge_id, candidate_solution, output, score, created_at, updated_at
       """.query(submissionCodec)
 
   def delete: Command[SubmissionId] =

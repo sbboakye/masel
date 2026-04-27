@@ -1,6 +1,6 @@
 -- Enums
 CREATE TYPE challenge_status AS ENUM ('draft', 'validated', 'active', 'archived');
-CREATE TYPE difficulty AS ENUM ('easy', 'medium', 'hard');
+CREATE TYPE challenge_difficulty AS ENUM ('easy', 'medium', 'hard');
 
 -- Shared trigger
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -20,7 +20,7 @@ CREATE TABLE challenges (
     expected_solution TEXT NOT NULL,
     output           JSONB,
     allotted_time    INT NOT NULL,
-    difficulty       difficulty NOT NULL,
+    difficulty       challenge_difficulty NOT NULL,
     created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );

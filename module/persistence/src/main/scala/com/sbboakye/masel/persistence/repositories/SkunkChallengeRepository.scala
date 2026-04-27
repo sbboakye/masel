@@ -3,6 +3,7 @@ package com.sbboakye.masel.persistence.repositories
 import cats.effect.*
 import cats.syntax.all.*
 import com.sbboakye.masel.core.domain.{Challenge, ChallengeId, ChallengeUpdate}
+import com.sbboakye.masel.core.errors.AppError.NotFound
 import com.sbboakye.masel.core.ports.ChallengeRepository
 import com.sbboakye.masel.persistence.queries.ChallengeQueries
 import skunk.Session
@@ -42,12 +43,12 @@ class SkunkChallengeRepository[F[_]: {Concurrent, LoggerFactory}](pool: Resource
       }
     }
 
-  override def delete(id: ChallengeId): F[Int] = {
+  override def delete(id: ChallengeId): F[Either[NotFound, Boolean]] = {
     pool.use { session =>
       session.prepare(ChallengeQueries.delete).flatMap { ps =>
         ps.execute(id).map {
-          case Completion.Delete(n) => n
-          case _ => 0
+          case Completion.Delete(n) => Right(n > 0)
+          case _ => Left(NotFound(s"Challenge with $id not found", id.value))
         }
       }
     }
