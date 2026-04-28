@@ -21,12 +21,3 @@ case class Submission(
 object Submission:
   given Encoder[Submission] = deriveEncoder[Submission]
   given Decoder[Submission] = deriveDecoder[Submission]
-
-case class SubmissionUpdate(
-                       candidateSolution: NonEmptyString,
-                       id: SubmissionId
-                     )
-
-object SubmissionUpdate:
-  given Encoder[SubmissionUpdate] = deriveEncoder[SubmissionUpdate]
-  given Decoder[SubmissionUpdate] = deriveDecoder[SubmissionUpdate]

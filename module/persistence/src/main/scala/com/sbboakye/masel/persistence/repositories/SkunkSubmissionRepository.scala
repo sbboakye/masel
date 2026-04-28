@@ -3,8 +3,8 @@ package com.sbboakye.masel.persistence.repositories
 import cats.data.EitherT
 import cats.effect.*
 import cats.syntax.all.*
-import com.sbboakye.masel.core.domain.dto.CreateSubmissionRequest
-import com.sbboakye.masel.core.domain.{Submission, SubmissionId, SubmissionUpdate}
+import com.sbboakye.masel.core.domain.dto.{CreateSubmissionRequest, UpdateSubmissionRequest}
+import com.sbboakye.masel.core.domain.{Submission, SubmissionId}
 import com.sbboakye.masel.core.errors.AppError
 import com.sbboakye.masel.core.errors.AppError.{InternalError, NotFound}
 import com.sbboakye.masel.core.ports.SubmissionRepository
@@ -45,16 +45,15 @@ class SkunkSubmissionRepository[F[_]: {Concurrent, LoggerFactory}](pool: Resourc
       }.attempt.map(_.leftMap(error => InternalError(error.getMessage, error.getCause.some)))
     )
 
-  override def update(submission: SubmissionUpdate): EitherT[F, AppError, Submission] =
+  override def update(submission: UpdateSubmissionRequest): EitherT[F, AppError, Boolean] =
     EitherT(
       pool.use { session =>
         session.prepare(SubmissionQueries.update).flatMap {ps =>
-          val submissionTupleTyped = Tuple.fromProductTyped(submission)
-          ps.option(submissionTupleTyped)
+          ps.execute(submission).map {
+            case Completion.Delete(0) => Left(NotFound(s"Submission with ${submission.id} not found."))
+            case Completion.Delete(n) => Right(n > 0)
+          }
         }
-      }.flatMap {
-        case None => Left(NotFound(s"Submission with ${submission.id} not found.")).pure
-        case Some(submission) => Right(submission).pure
       }
     )
 

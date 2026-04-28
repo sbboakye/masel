@@ -1,9 +1,9 @@
 package com.sbboakye.masel.persistence.queries
 
-import com.sbboakye.masel.core.domain.{Challenge, ChallengeDifficulty, ChallengeId, ChallengeStatus, ChallengeUpdate}
+import com.sbboakye.masel.core.domain.{Challenge, ChallengeDifficulty, ChallengeId, ChallengeStatus}
 import com.sbboakye.masel.persistence.codec.SkunkCodec.{challengeCodec, challengeDifficulty, challengeId, challengeStatus, createChallengeCodec}
 import cats.syntax.all.*
-import com.sbboakye.masel.core.domain.dto.CreateChallengeRequest
+import com.sbboakye.masel.core.domain.dto.{CreateChallengeRequest, UpdateChallengeRequest}
 import skunk.*
 import skunk.implicits.*
 import skunk.codec.all.*
@@ -55,10 +55,7 @@ object ChallengeQueries:
       RETURNING id, title, instructions, status, expected_solution, output, allotted_time, difficulty, created_at, updated_at
     """.query(challengeCodec)
 
-  def update: Query[
-    (String, String, ChallengeStatus, String, Int, ChallengeDifficulty, ChallengeId), 
-    Challenge
-  ] =
+  def update: Command[UpdateChallengeRequest] =
     sql"""
       UPDATE challenges
       SET title = $varchar,
@@ -68,8 +65,10 @@ object ChallengeQueries:
           allotted_time = $int4,
           difficulty = $challengeDifficulty
       WHERE id = $challengeId
-      RETURNING id, title, instructions, status, expected_solution, output, allotted_time, difficulty, created_at, updated_at
-    """.query(challengeCodec)
+    """.command
+      .contramap[UpdateChallengeRequest] { c =>
+        (c.title, c.instructions, c.status, c.expectedSolution, c.allottedTime, c.difficulty, c.id)
+      }
 
   def delete: Command[ChallengeId] =
     sql"""

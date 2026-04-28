@@ -3,8 +3,8 @@ package com.sbboakye.masel.persistence.repositories
 import cats.data.EitherT
 import cats.effect.*
 import cats.syntax.all.*
-import com.sbboakye.masel.core.domain.dto.CreateChallengeRequest
-import com.sbboakye.masel.core.domain.{Challenge, ChallengeId, ChallengeUpdate}
+import com.sbboakye.masel.core.domain.dto.{CreateChallengeRequest, UpdateChallengeRequest}
+import com.sbboakye.masel.core.domain.{Challenge, ChallengeId}
 import com.sbboakye.masel.core.errors.AppError
 import com.sbboakye.masel.core.errors.AppError.{InternalError, NotFound}
 import com.sbboakye.masel.core.ports.ChallengeRepository
@@ -45,15 +45,14 @@ class SkunkChallengeRepository[F[_]: {Concurrent, LoggerFactory}](pool: Resource
       }.attempt.map(_.leftMap(error => InternalError(error.getMessage, error.getCause.some)))
     )
     
-  override def update(challenge: ChallengeUpdate): EitherT[F, AppError, Challenge] =
+  override def update(challenge: UpdateChallengeRequest): EitherT[F, AppError, Boolean] =
     EitherT(
       pool.use { session =>
         session.prepare(ChallengeQueries.update).flatMap { ps =>
-          val challengeTupleTyped = Tuple.fromProductTyped(challenge)
-          ps.option(challengeTupleTyped)
-        }.flatMap {
-          case None => Left(NotFound(s"Challenge with ${challenge.id} not found.")).pure
-          case Some(challenge) => Right(challenge).pure
+          ps.execute(challenge).map {
+            case Completion.Delete(0) => Left(NotFound(s"Challenge with ${challenge.id} not found."))
+            case Completion.Delete(n) => Right(n > 0)
+          }
         }
       }
     )

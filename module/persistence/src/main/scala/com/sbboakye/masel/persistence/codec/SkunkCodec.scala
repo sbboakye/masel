@@ -1,9 +1,9 @@
 package com.sbboakye.masel.persistence.codec
 
-import com.sbboakye.masel.core.domain.dto.{CreateChallengeRequest, CreateSubmissionRequest}
+import com.sbboakye.masel.core.domain.dto.{CreateChallengeRequest, CreateSubmissionRequest, UpdateChallengeRequest, UpdateSubmissionRequest}
 import skunk.*
 import skunk.codec.all.*
-import com.sbboakye.masel.core.domain.{Challenge, ChallengeDifficulty, ChallengeId, ChallengeStatus, ChallengeUpdate, NonEmptyString, PositiveInt, Score, Submission, SubmissionId}
+import com.sbboakye.masel.core.domain.{Challenge, ChallengeDifficulty, ChallengeId, ChallengeStatus, NonEmptyString, PositiveInt, Score, Submission, SubmissionId}
 import skunk.circe.codec.all.*
 import skunk.data.Type
 import io.github.iltotore.iron.*

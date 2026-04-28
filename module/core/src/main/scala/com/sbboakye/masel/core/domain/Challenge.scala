@@ -44,17 +44,3 @@ case class Challenge(
 object Challenge:
   given Encoder[Challenge] = deriveEncoder[Challenge]
   given Decoder[Challenge] = deriveDecoder[Challenge]
-
-case class ChallengeUpdate(
-                            title: NonEmptyString,
-                            instructions: NonEmptyString,
-                            status: ChallengeStatus,
-                            expectedSolution: NonEmptyString,
-                            allottedTime: PositiveInt,
-                            difficulty: ChallengeDifficulty,
-                            id: ChallengeId
-                          )
-
-object ChallengeUpdate:
-  given Encoder[ChallengeUpdate] = deriveEncoder[ChallengeUpdate]
-  given Decoder[ChallengeUpdate] = deriveDecoder[ChallengeUpdate]
