@@ -4,8 +4,8 @@ import cats.effect.std.Console
 import cats.effect.{Async, Resource}
 import org.typelevel.otel4s.metrics.Meter.Implicits.noop
 import org.typelevel.otel4s.trace.Tracer.Implicits.noop
-import skunk.Session
 import skunk.Session.Credentials
+import skunk.{Session, TypingStrategy}
 
 case class PoolSession[F[_]: {Async, Console}](
     host: String,
@@ -26,4 +26,5 @@ case class PoolSession[F[_]: {Async, Console}](
         password = Some(password),
       ),
     )
+    .withTypingStrategy(TypingStrategy.SearchPath)
     .pooled(maxPoolSize)
