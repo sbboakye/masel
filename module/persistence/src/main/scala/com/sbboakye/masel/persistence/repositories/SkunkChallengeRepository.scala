@@ -3,6 +3,7 @@ package com.sbboakye.masel.persistence.repositories
 import cats.data.EitherT
 import cats.effect.*
 import cats.syntax.all.*
+import com.sbboakye.masel.core.domain.dto.CreateChallengeRequest
 import com.sbboakye.masel.core.domain.{Challenge, ChallengeId, ChallengeUpdate}
 import com.sbboakye.masel.core.errors.AppError
 import com.sbboakye.masel.core.errors.AppError.{InternalError, NotFound}
@@ -35,7 +36,7 @@ class SkunkChallengeRepository[F[_]: {Concurrent, LoggerFactory}](pool: Resource
       }
     )
 
-  override def create(challenge: Challenge): EitherT[F, AppError, Challenge] =
+  override def create(challenge: CreateChallengeRequest): EitherT[F, AppError, Challenge] =
     EitherT(
       pool.use { session =>
         session.prepare(ChallengeQueries.create).flatMap { ps =>

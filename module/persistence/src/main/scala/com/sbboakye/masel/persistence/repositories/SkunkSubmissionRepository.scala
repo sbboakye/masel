@@ -3,6 +3,7 @@ package com.sbboakye.masel.persistence.repositories
 import cats.data.EitherT
 import cats.effect.*
 import cats.syntax.all.*
+import com.sbboakye.masel.core.domain.dto.CreateSubmissionRequest
 import com.sbboakye.masel.core.domain.{Submission, SubmissionId, SubmissionUpdate}
 import com.sbboakye.masel.core.errors.AppError
 import com.sbboakye.masel.core.errors.AppError.{InternalError, NotFound}
@@ -35,7 +36,7 @@ class SkunkSubmissionRepository[F[_]: {Concurrent, LoggerFactory}](pool: Resourc
       }
     )
 
-  override def create(submission: Submission): EitherT[F, AppError, Submission] =
+  override def create(submission: CreateSubmissionRequest): EitherT[F, AppError, Submission] =
     EitherT(
       pool.use { session =>
         session.prepare(SubmissionQueries.create).flatMap { ps =>

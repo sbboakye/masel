@@ -1,5 +1,6 @@
 package com.sbboakye.masel.persistence.codec
 
+import com.sbboakye.masel.core.domain.dto.{CreateChallengeRequest, CreateSubmissionRequest}
 import skunk.*
 import skunk.codec.all.*
 import com.sbboakye.masel.core.domain.{Challenge, ChallengeDifficulty, ChallengeId, ChallengeStatus, ChallengeUpdate, NonEmptyString, PositiveInt, Score, Submission, SubmissionId}
@@ -45,6 +46,15 @@ object SkunkCodec:
   val challengeCodec: Codec[Challenge] =
     challengeCodecTypes.to[Challenge]
 
+  val createChallengeCodecTypes = challengeTitle *:
+    challengeInstructions *:
+    challengeExpectedSolutions *:
+    challengeAllottedTime *:
+    challengeDifficulty
+
+  val createChallengeCodec: Codec[CreateChallengeRequest] =
+    createChallengeCodecTypes.to[CreateChallengeRequest]
+
   // submission codecs
   val submissionId: Codec[SubmissionId] =
     uuid.imap(SubmissionId.apply)(SubmissionId.value)
@@ -61,3 +71,9 @@ object SkunkCodec:
 
   val submissionCodec: Codec[Submission] =
     submissionCodecTypes.to[Submission]
+
+  val createSubmissionCodecTypes = challengeId *:
+    submissionSolution
+
+  val createSubmissionCodec: Codec[CreateSubmissionRequest] =
+    createSubmissionCodecTypes.to[CreateSubmissionRequest]

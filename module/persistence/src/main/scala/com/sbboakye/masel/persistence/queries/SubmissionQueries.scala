@@ -1,8 +1,9 @@
 package com.sbboakye.masel.persistence.queries
 
 import com.sbboakye.masel.core.domain.{Submission, SubmissionId, SubmissionUpdate}
-import com.sbboakye.masel.persistence.codec.SkunkCodec.{submissionCodec, submissionId}
+import com.sbboakye.masel.persistence.codec.SkunkCodec.{createSubmissionCodec, submissionCodec, submissionId}
 import cats.syntax.all.*
+import com.sbboakye.masel.core.domain.dto.CreateSubmissionRequest
 import skunk.*
 import skunk.implicits.*
 import skunk.codec.all.*
@@ -39,14 +40,14 @@ object SubmissionQueries:
            WHERE id = $submissionId
       """.query(submissionCodec)
 
-  def create: Query[Submission, Submission] =
+  def create: Query[CreateSubmissionRequest, Submission] =
     sql"""
-        INSERT INTO submissions (id, challenge_id, candidate_solution, output, score, created_at, updated_at)
+        INSERT INTO submissions (challenge_id, candidate_solution)
         VALUES (
-          $submissionCodec
+          $createSubmissionCodec
         )
         RETURNING id, challenge_id, candidate_solution, output, score, created_at, updated_at
-      """.query(submissionCodec)
+    """.query(submissionCodec)
 
   def update: Query[
     (String, SubmissionId),
