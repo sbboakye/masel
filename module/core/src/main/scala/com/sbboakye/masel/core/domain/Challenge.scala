@@ -27,7 +27,7 @@ case class Challenge(
     id: ChallengeId,
     title: NonEmptyString,
     instructions: NonEmptyString,
-    status: ChallengeStatus = ChallengeStatus.Draft,
+    status: ChallengeStatus,
     expectedSolution: NonEmptyString,
     output: Option[io.circe.Json],
     allottedTime: PositiveInt,

@@ -10,9 +10,9 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 import skunk.Session
 
 trait CoreSpec:
-  val scriptPath: String
-  val initSqlString: String = scala.io.Source.fromResource(scriptPath).mkString
-  val statements: Seq[String] = initSqlString.split(";").toList.filter(_.trim.nonEmpty)
+  val initSqlString: String
+//  val initSqlString: String = scala.io.Source.fromResource(scriptPath).mkString
+//  val statements: Seq[String] = initSqlString.split(";").toList.filter(_.trim.nonEmpty)
 
   given logger: Logger[IO] = Slf4jLogger.getLogger[IO]
 
@@ -39,6 +39,6 @@ trait CoreSpec:
       database = db.databaseName,
       username = db.username,
       password = db.password,
-      maxPoolSize = 10,
+      maxPoolSize = 1,
     ).poolSession
   } yield pool
