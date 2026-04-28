@@ -1,9 +1,11 @@
 package com.sbboakye.masel.persistence.repositories
 
+import cats.data.EitherT
 import cats.effect.*
 import cats.syntax.all.*
 import com.sbboakye.masel.core.domain.{Challenge, ChallengeId, ChallengeUpdate}
-import com.sbboakye.masel.core.errors.AppError.NotFound
+import com.sbboakye.masel.core.errors.AppError
+import com.sbboakye.masel.core.errors.AppError.{InternalError, NotFound}
 import com.sbboakye.masel.core.ports.ChallengeRepository
 import com.sbboakye.masel.persistence.queries.ChallengeQueries
 import skunk.Session
@@ -21,35 +23,48 @@ class SkunkChallengeRepository[F[_]: {Concurrent, LoggerFactory}](pool: Resource
         }
       }
 
-  override def findById(id: ChallengeId): F[Option[Challenge]] =
-    pool.use { session =>
-      session.prepare(ChallengeQueries.findById).flatMap { ps =>
-        ps.option(id)
+  override def findById(id: ChallengeId): EitherT[F, AppError, Challenge] =
+    EitherT(
+      pool.use { session =>
+        session.prepare(ChallengeQueries.findById).flatMap { ps =>
+          ps.option(id)
+        }
+      }.flatMap {
+        case None => Left(NotFound(s"Challenge with $id not found.")).pure
+        case Some(challenge) => Right(challenge).pure
       }
-    }
+    )
 
-  override def create(challenge: Challenge): F[Challenge] =
-    pool.use { session =>
-      session.prepare(ChallengeQueries.create).flatMap { ps =>
-        ps.unique(challenge)
-      }
-    }
-
-  override def update(challenge: ChallengeUpdate): F[Option[Challenge]] =
-    pool.use { session =>
-      session.prepare(ChallengeQueries.update).flatMap { ps =>
-        val challengeTupleTyped = Tuple.fromProductTyped(challenge)
-        ps.option(challengeTupleTyped)
-      }
-    }
-
-  override def delete(id: ChallengeId): F[Either[NotFound, Boolean]] = {
-    pool.use { session =>
-      session.prepare(ChallengeQueries.delete).flatMap { ps =>
-        ps.execute(id).map {
-          case Completion.Delete(n) => Right(n > 0)
-          case _ => Left(NotFound(s"Challenge with $id not found", id.value))
+  override def create(challenge: Challenge): EitherT[F, AppError, Challenge] =
+    EitherT(
+      pool.use { session =>
+        session.prepare(ChallengeQueries.create).flatMap { ps =>
+          ps.unique(challenge)
+        }
+      }.attempt.map(_.leftMap(error => InternalError(error.getMessage, error.getCause.some)))
+    )
+    
+  override def update(challenge: ChallengeUpdate): EitherT[F, AppError, Challenge] =
+    EitherT(
+      pool.use { session =>
+        session.prepare(ChallengeQueries.update).flatMap { ps =>
+          val challengeTupleTyped = Tuple.fromProductTyped(challenge)
+          ps.option(challengeTupleTyped)
+        }.flatMap {
+          case None => Left(NotFound(s"Challenge with ${challenge.id} not found.")).pure
+          case Some(challenge) => Right(challenge).pure
         }
       }
-    }
-  }
+    )
+
+  override def delete(id: ChallengeId): EitherT[F, AppError, Boolean] =
+    EitherT(
+      pool.use { session =>
+        session.prepare(ChallengeQueries.delete).flatMap { ps =>
+          ps.execute(id).map {
+            case Completion.Delete(0) => Left(NotFound(s"Challenge with $id not found."))
+            case Completion.Delete(n) => Right(n > 0)
+          }
+        }
+      }
+    )

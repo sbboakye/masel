@@ -4,6 +4,9 @@ import cats.effect.*
 import cats.effect.{ExitCode, IOApp}
 import com.sbboakye.masel.persistence.FlywayMigrator
 import com.sbboakye.masel.persistence.repositories.{SkunkChallengeRepository, SkunkSubmissionRepository}
+import org.http4s.HttpRoutes
+import org.http4s.ember.server.EmberServerBuilder
+import org.http4s.server.{Router, Server}
 import org.typelevel.log4cats.slf4j.Slf4jFactory
 import org.typelevel.log4cats.LoggerFactory
 import skunk.*
@@ -22,7 +25,7 @@ object Main extends IOApp:
     } yield ExitCode.Success
   }
 
-  private def buildApp(config: AppConfig): Resource[IO, Unit] =
+  private def buildApp(config: AppConfig): Resource[IO, Server] =
     for
       logger <- Resource.eval(LoggerFactory[IO].create)
       _ <- Resource.eval(
@@ -46,10 +49,21 @@ object Main extends IOApp:
         .pooled(max = config.database.maxPoolSize)
       _ <- Resource.eval(logger.info("Database connection established"))
 
-      // Repositories
+      // Repositories to be used later in phase 2 with services
       challengesRepo = SkunkChallengeRepository[IO](session)
       submissionRepo = SkunkSubmissionRepository[IO](session)
 
+      httpApp = Router(
+        "/" -> HttpRoutes.empty[IO]
+      ).orNotFound
+
       // Server
       _ <- Resource.eval(logger.info("Starting server"))
-    yield ()
+      emberServer <- EmberServerBuilder
+        .default[IO]
+        .withHost(config.server.host)
+        .withPort(config.server.port)
+        .withHttpApp(httpApp)
+        .build
+        .evalTap(server => logger.info(s"Server started on ${server.address}"))
+    yield emberServer

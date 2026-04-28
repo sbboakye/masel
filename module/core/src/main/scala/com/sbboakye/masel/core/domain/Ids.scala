@@ -1,5 +1,6 @@
 package com.sbboakye.masel.core.domain
 
+import cats.effect.Sync
 import io.circe.{Decoder, Encoder}
 
 import java.util.UUID
@@ -17,14 +18,14 @@ inline def uuidDecoder[A](inline wrap: UUID => A): Decoder[A] =
 
 object ChallengeId:
   def apply(uuid: UUID): ChallengeId = uuid
-  def generate: ChallengeId = UUID.randomUUID()
+  def generate[F[_]: Sync]: F[ChallengeId] = Sync[F].delay(UUID.randomUUID())
   extension (id: ChallengeId) def value: UUID = id
   given ChallengeIdEncoder: Encoder[ChallengeId] = uuidEncoder(_.value)
   given ChallengeIdDecoder: Decoder[ChallengeId] = uuidDecoder(ChallengeId.apply)
 
 object SubmissionId:
   def apply(uuid: UUID): SubmissionId = uuid
-  def generate: SubmissionId = UUID.randomUUID()
+  def generate[F[_]: Sync]: F[SubmissionId] = Sync[F].delay(UUID.randomUUID())
   extension (id: SubmissionId) def value: UUID = id
   given SubmissionIdEncoder: Encoder[SubmissionId] = uuidEncoder(_.value)
   given SubmissionIdDecoder: Decoder[SubmissionId] = uuidDecoder(SubmissionId.apply)

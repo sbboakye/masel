@@ -1,9 +1,11 @@
 package com.sbboakye.masel.persistence.repositories
 
+import cats.data.EitherT
 import cats.effect.*
 import cats.syntax.all.*
 import com.sbboakye.masel.core.domain.{Submission, SubmissionId, SubmissionUpdate}
-import com.sbboakye.masel.core.errors.AppError.NotFound
+import com.sbboakye.masel.core.errors.AppError
+import com.sbboakye.masel.core.errors.AppError.{InternalError, NotFound}
 import com.sbboakye.masel.core.ports.SubmissionRepository
 import com.sbboakye.masel.persistence.queries.SubmissionQueries
 import org.typelevel.log4cats.LoggerFactory
@@ -21,36 +23,48 @@ class SkunkSubmissionRepository[F[_]: {Concurrent, LoggerFactory}](pool: Resourc
         }
     }
 
-  override def findById(id: SubmissionId): F[Option[Submission]] = {
-    pool.use { session =>
-      session.prepare(SubmissionQueries.findById).flatMap { ps =>
-        ps.option(id)
+  override def findById(id: SubmissionId): EitherT[F, AppError, Submission] =
+    EitherT(
+      pool.use { session =>
+        session.prepare(SubmissionQueries.findById).flatMap { ps =>
+          ps.option(id)
+        }
+      }.flatMap {
+        case None => Left(NotFound(s"Submission with $id not found.")).pure
+        case Some(submission) => Right(submission).pure
       }
-    }
-  }
+    )
 
-  override def create(submission: Submission): F[Submission] = {
-    pool.use { session =>
-      session.prepare(SubmissionQueries.create).flatMap { ps =>
-        ps.unique(submission)
+  override def create(submission: Submission): EitherT[F, AppError, Submission] =
+    EitherT(
+      pool.use { session =>
+        session.prepare(SubmissionQueries.create).flatMap { ps =>
+          ps.unique(submission)
+        }
+      }.attempt.map(_.leftMap(error => InternalError(error.getMessage, error.getCause.some)))
+    )
+
+  override def update(submission: SubmissionUpdate): EitherT[F, AppError, Submission] =
+    EitherT(
+      pool.use { session =>
+        session.prepare(SubmissionQueries.update).flatMap {ps =>
+          val submissionTupleTyped = Tuple.fromProductTyped(submission)
+          ps.option(submissionTupleTyped)
+        }
+      }.flatMap {
+        case None => Left(NotFound(s"Submission with ${submission.id} not found.")).pure
+        case Some(submission) => Right(submission).pure
       }
-    }
-  }
+    )
 
-  override def update(submission: SubmissionUpdate): F[Option[Submission]] =
-    pool.use { session =>
-      session.prepare(SubmissionQueries.update).flatMap {ps =>
-        val submissionTupleTyped = Tuple.fromProductTyped(submission)
-        ps.option(submissionTupleTyped)
-      }
-    }
-
-  override def delete(id: SubmissionId): F[Either[NotFound, Boolean]] =
-    pool.use { session =>
-      session.prepare(SubmissionQueries.delete).flatMap { ps =>
-        ps.execute(id).map {
-          case Completion.Delete(n) => Right(n > 0)
-          case _ => Left(NotFound(s"Submission with $id not found", id.value))
+  override def delete(id: SubmissionId): EitherT[F, AppError, Boolean] =
+    EitherT(
+      pool.use { session =>
+        session.prepare(SubmissionQueries.delete).flatMap { ps =>
+          ps.execute(id).map {
+            case Completion.Delete(0) => Left(NotFound(s"Submission with $id not found"))
+            case Completion.Delete(n) => Right(n > 0)
+          }
         }
       }
-    }
+    )
