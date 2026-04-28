@@ -49,8 +49,8 @@ class SkunkSubmissionRepository[F[_]: Concurrent](pool: Resource[F, Session[F]])
       pool.use { session =>
         session.prepare(SubmissionQueries.update).flatMap {ps =>
           ps.execute(submission).map {
-            case Completion.Delete(0) => Left(NotFound(s"Submission with ${submission.id} not found."))
-            case Completion.Delete(n) => Right(n > 0)
+            case Completion.Update(0) => Left(NotFound(s"Submission with ${submission.id} not found."))
+            case Completion.Update(n) => Right(n > 0)
           }
         }
       }

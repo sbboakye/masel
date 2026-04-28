@@ -49,8 +49,8 @@ class SkunkChallengeRepository[F[_]: Concurrent](pool: Resource[F, Session[F]]) 
       pool.use { session =>
         session.prepare(ChallengeQueries.update).flatMap { ps =>
           ps.execute(challenge).map {
-            case Completion.Delete(0) => Left(NotFound(s"Challenge with ${challenge.id} not found."))
-            case Completion.Delete(n) => Right(n > 0)
+            case Completion.Update(0) => Left(NotFound(s"Challenge with ${challenge.id} not found."))
+            case Completion.Update(n) => Right(n > 0)
           }
         }
       }
