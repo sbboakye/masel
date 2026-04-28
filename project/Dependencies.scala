@@ -84,7 +84,7 @@ object Dependencies {
   // Dependency groups
   val coreDeps: Seq[ModuleID] = Seq(cats, catsEffect, fs2Core, fs2IO, circeCore, circeGeneric, ironCore, ironCirce, ironCiris, ironCats)
 
-  val persistenceDeps: Seq[ModuleID] = Seq(skunkCore, skunkCirce, postgresql, flyway, flywayPostgres, log4catsSlf4j)
+  val persistenceDeps: Seq[ModuleID] = Seq(cats, catsEffect, skunkCore, skunkCirce, postgresql, flyway, flywayPostgres, log4catsSlf4j)
 
   val apiDeps: Seq[ModuleID] = Seq(http4sEmberServer, http4sEmberClient, http4sCirce, http4sDsl)
 

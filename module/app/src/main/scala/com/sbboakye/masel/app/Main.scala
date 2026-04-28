@@ -4,15 +4,12 @@ import cats.effect.*
 import cats.effect.{ExitCode, IOApp}
 import com.sbboakye.masel.persistence.FlywayMigrator
 import com.sbboakye.masel.persistence.repositories.{SkunkChallengeRepository, SkunkSubmissionRepository}
+import com.sbboakye.masel.persistence.session.PoolSession
 import org.http4s.HttpRoutes
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.{Router, Server}
 import org.typelevel.log4cats.LoggerFactory
 import org.typelevel.log4cats.slf4j.Slf4jFactory
-import org.typelevel.otel4s.metrics.Meter.Implicits.noop
-import org.typelevel.otel4s.trace.Tracer.Implicits.noop
-import skunk.*
-import skunk.Session.Credentials
 
 object Main extends IOApp:
 
@@ -35,18 +32,14 @@ object Main extends IOApp:
         ).migrate(),
       )
       _ <- Resource.eval(logger.info("Database migration completed"))
-      session <- Session
-        .Builder[IO]
-        .withHost(config.database.host)
-        .withPort(config.database.port)
-        .withDatabase(config.database.dbName)
-        .withCredentials(
-          Credentials(
-            user = config.database.username,
-            password = Some(config.database.password.value),
-          ),
-        )
-        .pooled(max = config.database.maxPoolSize)
+      session <- PoolSession[IO](
+        host = config.database.host.toString,
+        port = config.database.port.toString.toInt,
+        database = config.database.dbName,
+        username = config.database.username,
+        password = config.database.password.value,
+        maxPoolSize = config.database.maxPoolSize,
+      ).poolSession
       _ <- Resource.eval(logger.info("Database connection established"))
 
       // Repositories to be used later in phase 2 with services
