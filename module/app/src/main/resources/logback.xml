@@ -2,7 +2,7 @@
 <configuration>
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
     </encoder>
   </appender>
 
@@ -12,6 +12,6 @@
 
   <logger name="com.sbboakye" level="DEBUG"/>
   <logger name="org.flywaydb" level="INFO"/>
-  <logger name="doobie" level="WARN"/>
+  <logger name="skunk" level="WARN"/>
   <logger name="org.http4s" level="WARN"/>
 </configuration>
