@@ -1,13 +1,12 @@
 package com.sbboakye.masel.persistence.queries
 
-import com.sbboakye.masel.core.domain.{Submission, SubmissionId}
-import com.sbboakye.masel.persistence.codec.SkunkCodec.{createSubmissionCodec, submissionCodec, submissionId}
 import cats.syntax.all.*
 import com.sbboakye.masel.core.domain.dto.{CreateSubmissionRequest, UpdateSubmissionRequest}
+import com.sbboakye.masel.core.domain.{Submission, SubmissionId}
+import com.sbboakye.masel.persistence.codec.SkunkCodec.{createSubmissionCodec, submissionCodec, submissionId}
 import skunk.*
-import skunk.implicits.*
 import skunk.codec.all.*
-
+import skunk.implicits.*
 
 object SubmissionQueries:
 
@@ -56,9 +55,7 @@ object SubmissionQueries:
             candidate_solution = $text
         WHERE id = $submissionId
       """.command
-      .contramap[UpdateSubmissionRequest] { s =>
-        (s.candidateSolution, s.id)
-      }
+      .contramap[UpdateSubmissionRequest](s => (s.candidateSolution, s.id))
 
   def delete: Command[SubmissionId] =
     sql"""

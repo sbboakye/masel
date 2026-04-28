@@ -2,7 +2,6 @@ package com.sbboakye.masel.core.domain
 
 import cats.effect.Sync
 import io.circe.{Decoder, Encoder}
-
 import java.util.UUID
 
 opaque type ChallengeId = UUID
@@ -12,9 +11,7 @@ inline def uuidEncoder[A](inline valueOf: A => UUID): Encoder[A] =
   Encoder.encodeString.contramap(a => valueOf(a).toString)
 
 inline def uuidDecoder[A](inline wrap: UUID => A): Decoder[A] =
-  Decoder.decodeString.emap { a =>
-    scala.util.Try(UUID.fromString(a)).toEither.left.map(_.getMessage).map(wrap)
-  }
+  Decoder.decodeString.emap(a => scala.util.Try(UUID.fromString(a)).toEither.left.map(_.getMessage).map(wrap))
 
 object ChallengeId:
   def apply(uuid: UUID): ChallengeId = uuid

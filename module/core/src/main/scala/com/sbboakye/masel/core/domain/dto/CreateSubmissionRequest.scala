@@ -6,9 +6,9 @@ import io.circe.{Decoder, Encoder}
 import io.github.iltotore.iron.circe.given
 
 case class CreateSubmissionRequest(
-           challengeId: ChallengeId,
-           candidateSolution: NonEmptyString
-         )
+    challengeId: ChallengeId,
+    candidateSolution: NonEmptyString,
+)
 
 object CreateSubmissionRequest:
   given Encoder[CreateSubmissionRequest] = deriveEncoder[CreateSubmissionRequest]

@@ -14,46 +14,43 @@ import skunk.Session
 import skunk.data.Completion
 
 class SkunkSubmissionRepository[F[_]: Concurrent](pool: Resource[F, Session[F]]) extends SubmissionRepository[F]:
-  override def findAll(limit: Int, offset: Int): Stream[F, Submission] =
+  override def findAll(limit: Int, offset: Int): Stream[F, Either[AppError, Submission]] =
     Stream
       .resource(pool)
       .flatMap { session =>
-        Stream.eval(session.prepare(SubmissionQueries.findAll)).flatMap {ps =>
-          ps.stream((limit, offset), 10)
-        }
-    }
+        Stream
+          .eval(session.prepare(SubmissionQueries.findAll))
+          .flatMap(ps => ps.stream((limit, offset), 10))
+          .attempt
+          .map(_.leftMap(error => InternalError(error.getMessage, error.getCause.some)))
+      }
 
   override def findById(id: SubmissionId): EitherT[F, AppError, Submission] =
     EitherT(
-      pool.use { session =>
-        session.prepare(SubmissionQueries.findById).flatMap { ps =>
-          ps.option(id)
-        }
-      }.flatMap {
+      pool.use(session => session.prepare(SubmissionQueries.findById).flatMap(ps => ps.option(id))).flatMap {
         case None => Left(NotFound(s"Submission with $id not found.")).pure
         case Some(submission) => Right(submission).pure
-      }
+      },
     )
 
   override def create(submission: CreateSubmissionRequest): EitherT[F, AppError, Submission] =
     EitherT(
-      pool.use { session =>
-        session.prepare(SubmissionQueries.create).flatMap { ps =>
-          ps.unique(submission)
-        }
-      }.attempt.map(_.leftMap(error => InternalError(error.getMessage, error.getCause.some)))
+      pool
+        .use(session => session.prepare(SubmissionQueries.create).flatMap(ps => ps.unique(submission)))
+        .attempt
+        .map(_.leftMap(error => InternalError(error.getMessage, error.getCause.some))),
     )
 
   override def update(submission: UpdateSubmissionRequest): EitherT[F, AppError, Boolean] =
     EitherT(
       pool.use { session =>
-        session.prepare(SubmissionQueries.update).flatMap {ps =>
+        session.prepare(SubmissionQueries.update).flatMap { ps =>
           ps.execute(submission).map {
             case Completion.Update(0) => Left(NotFound(s"Submission with ${submission.id} not found."))
             case Completion.Update(n) => Right(n > 0)
           }
         }
-      }
+      },
     )
 
   override def delete(id: SubmissionId): EitherT[F, AppError, Boolean] =
@@ -65,5 +62,5 @@ class SkunkSubmissionRepository[F[_]: Concurrent](pool: Resource[F, Session[F]])
             case Completion.Delete(n) => Right(n > 0)
           }
         }
-      }
+      },
     )

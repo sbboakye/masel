@@ -1,19 +1,32 @@
 package com.sbboakye.masel.persistence.codec
 
-import com.sbboakye.masel.core.domain.dto.{CreateChallengeRequest, CreateSubmissionRequest, UpdateChallengeRequest, UpdateSubmissionRequest}
-import skunk.*
-import skunk.codec.all.*
-import com.sbboakye.masel.core.domain.{Challenge, ChallengeDifficulty, ChallengeId, ChallengeStatus, NonEmptyString, PositiveInt, Score, Submission, SubmissionId}
-import skunk.circe.codec.all.*
-import skunk.data.Type
+import com.sbboakye.masel.core.domain.dto.{
+  CreateChallengeRequest,
+  CreateSubmissionRequest,
+  UpdateChallengeRequest,
+  UpdateSubmissionRequest,
+}
+import com.sbboakye.masel.core.domain.{
+  Challenge,
+  ChallengeDifficulty,
+  ChallengeId,
+  ChallengeStatus,
+  NonEmptyString,
+  PositiveInt,
+  Score,
+  Submission,
+  SubmissionId,
+}
 import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*
+import skunk.*
+import skunk.circe.codec.all.*
+import skunk.codec.all.*
+import skunk.data.Type
 
 object SkunkCodec:
   private def refined[A, C](base: Codec[A])(using constraint: RuntimeConstraint[A, C]): Codec[A :| C] =
-    base.eimap[A :| C] { a =>
-      a.refineEither[C]
-    } {
+    base.eimap[A :| C](a => a.refineEither[C]) {
       identity
     }
 

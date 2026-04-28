@@ -1,13 +1,18 @@
 package com.sbboakye.masel.persistence.queries
 
-import com.sbboakye.masel.core.domain.{Challenge, ChallengeDifficulty, ChallengeId, ChallengeStatus}
-import com.sbboakye.masel.persistence.codec.SkunkCodec.{challengeCodec, challengeDifficulty, challengeId, challengeStatus, createChallengeCodec}
 import cats.syntax.all.*
 import com.sbboakye.masel.core.domain.dto.{CreateChallengeRequest, UpdateChallengeRequest}
+import com.sbboakye.masel.core.domain.{Challenge, ChallengeDifficulty, ChallengeId, ChallengeStatus}
+import com.sbboakye.masel.persistence.codec.SkunkCodec.{
+  challengeCodec,
+  challengeDifficulty,
+  challengeId,
+  challengeStatus,
+  createChallengeCodec,
+}
 import skunk.*
-import skunk.implicits.*
 import skunk.codec.all.*
-
+import skunk.implicits.*
 
 object ChallengeQueries:
 
