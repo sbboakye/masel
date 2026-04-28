@@ -9,12 +9,11 @@ import com.sbboakye.masel.core.errors.AppError
 import com.sbboakye.masel.core.errors.AppError.{InternalError, NotFound}
 import com.sbboakye.masel.core.ports.SubmissionRepository
 import com.sbboakye.masel.persistence.queries.SubmissionQueries
-import org.typelevel.log4cats.LoggerFactory
 import fs2.Stream
 import skunk.Session
 import skunk.data.Completion
 
-class SkunkSubmissionRepository[F[_]: {Concurrent, LoggerFactory}](pool: Resource[F, Session[F]]) extends SubmissionRepository[F]:
+class SkunkSubmissionRepository[F[_]: Concurrent](pool: Resource[F, Session[F]]) extends SubmissionRepository[F]:
   override def findAll(limit: Int, offset: Int): Stream[F, Submission] =
     Stream
       .resource(pool)

@@ -13,14 +13,15 @@ import io.github.iltotore.iron.cats.given
 
 
 case class DatabaseConfig(
-                           jdbcUrl: NonEmptyString,
                            host: Host,
                            port: Port,
                            username: NonEmptyString,
                            dbName: NonEmptyString,
                            password: Secret[DatabasePassword],
                            maxPoolSize: Int
-                         )
+                         ):
+  val jdbcUrl: String = s"jdbc:postgresql://${host.toString}:${port.toString}/$dbName"
+    
 
 case class ServerConfig(
                          host: Host,
@@ -36,7 +37,7 @@ object AppConfig:
   def loadF[F[_]: Async]: F[AppConfig] =
     val databaseConfig: ConfigValue[Effect, DatabaseConfig] = {
       (
-        env("DB_URL").as[NonEmptyString].default("jdbc:postgresql://localhost:5432/masel"),
+//        env("DB_URL").as[NonEmptyString].default("jdbc:postgresql://localhost:5432/masel"),
         env("DB_HOST").as[Host].default(ipv4"127.0.0.1"),
         env("DB_PORT").as[Port].default(port"5432"),
         env("DB_USERNAME").as[NonEmptyString].default("masel"),

@@ -11,10 +11,9 @@ import com.sbboakye.masel.core.ports.ChallengeRepository
 import com.sbboakye.masel.persistence.queries.ChallengeQueries
 import skunk.Session
 import fs2.Stream
-import org.typelevel.log4cats.LoggerFactory
 import skunk.data.Completion
 
-class SkunkChallengeRepository[F[_]: {Concurrent, LoggerFactory}](pool: Resource[F, Session[F]]) extends ChallengeRepository[F]:
+class SkunkChallengeRepository[F[_]: Concurrent](pool: Resource[F, Session[F]]) extends ChallengeRepository[F]:
   override def findAll(limit: Int, offset: Int): Stream[F, Challenge] =
     Stream
       .resource(pool)
@@ -44,7 +43,7 @@ class SkunkChallengeRepository[F[_]: {Concurrent, LoggerFactory}](pool: Resource
         }
       }.attempt.map(_.leftMap(error => InternalError(error.getMessage, error.getCause.some)))
     )
-    
+
   override def update(challenge: UpdateChallengeRequest): EitherT[F, AppError, Boolean] =
     EitherT(
       pool.use { session =>
