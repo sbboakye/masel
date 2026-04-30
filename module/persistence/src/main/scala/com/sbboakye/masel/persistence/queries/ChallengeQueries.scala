@@ -1,14 +1,13 @@
 package com.sbboakye.masel.persistence.queries
 
 import cats.syntax.all.*
-import com.sbboakye.masel.core.domain.dto.{CreateChallengeRequest, UpdateChallengeRequest}
+import com.sbboakye.masel.core.domain.dto.UpdateChallengeRequest
 import com.sbboakye.masel.core.domain.{Challenge, ChallengeDifficulty, ChallengeId, ChallengeStatus}
 import com.sbboakye.masel.persistence.codec.SkunkCodec.{
   challengeCodec,
   challengeDifficulty,
   challengeId,
   challengeStatus,
-  createChallengeCodec,
 }
 import skunk.*
 import skunk.codec.all.*
@@ -51,11 +50,11 @@ object ChallengeQueries:
          WHERE id = $challengeId
     """.query(challengeCodec)
 
-  def create: Query[CreateChallengeRequest, Challenge] =
+  def create: Query[Challenge, Challenge] =
     sql"""
-      INSERT INTO challenges (title, instructions, expected_solution, allotted_time, difficulty)
+      INSERT INTO challenges (id, title, instructions, status, expected_solution, output, allotted_time, difficulty, created_at, updated_at)
       VALUES (
-        $createChallengeCodec
+        $challengeCodec
       )
       RETURNING id, title, instructions, status, expected_solution, output, allotted_time, difficulty, created_at, updated_at
     """.query(challengeCodec)

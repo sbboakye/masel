@@ -2,10 +2,8 @@ package com.sbboakye.masel.persistence.repositories
 
 import cats.effect.*
 import cats.syntax.all.*
-import com.sbboakye.masel.core.domain.dto.{CreateChallengeRequest, UpdateChallengeRequest}
+import com.sbboakye.masel.core.domain.dto.UpdateChallengeRequest
 import com.sbboakye.masel.core.domain.{Challenge, ChallengeId}
-import com.sbboakye.masel.core.errors.AppError
-import com.sbboakye.masel.core.errors.AppError.{InternalError, NotFound}
 import com.sbboakye.masel.core.ports.ChallengeRepository
 import com.sbboakye.masel.persistence.queries.ChallengeQueries
 import fs2.Stream
@@ -25,7 +23,7 @@ class SkunkChallengeRepository[F[_]: Concurrent](pool: Resource[F, Session[F]]) 
   override def findById(id: ChallengeId): F[Option[Challenge]] =
     pool.use(session => session.prepare(ChallengeQueries.findById).flatMap(ps => ps.option(id)))
 
-  override def create(challenge: CreateChallengeRequest): F[Challenge] =
+  override def create(challenge: Challenge): F[Challenge] =
     pool
       .use(session => session.prepare(ChallengeQueries.create).flatMap(ps => ps.unique(challenge)))
 

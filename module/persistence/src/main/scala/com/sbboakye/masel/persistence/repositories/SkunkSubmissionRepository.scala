@@ -1,12 +1,9 @@
 package com.sbboakye.masel.persistence.repositories
 
-import cats.data.EitherT
 import cats.effect.*
 import cats.syntax.all.*
-import com.sbboakye.masel.core.domain.dto.{CreateSubmissionRequest, UpdateSubmissionRequest}
+import com.sbboakye.masel.core.domain.dto.UpdateSubmissionRequest
 import com.sbboakye.masel.core.domain.{Submission, SubmissionId}
-import com.sbboakye.masel.core.errors.AppError
-import com.sbboakye.masel.core.errors.AppError.{InternalError, NotFound}
 import com.sbboakye.masel.core.ports.SubmissionRepository
 import com.sbboakye.masel.persistence.queries.SubmissionQueries
 import fs2.Stream
@@ -26,7 +23,7 @@ class SkunkSubmissionRepository[F[_]: Concurrent](pool: Resource[F, Session[F]])
   override def findById(id: SubmissionId): F[Option[Submission]] =
     pool.use(session => session.prepare(SubmissionQueries.findById).flatMap(ps => ps.option(id)))
 
-  override def create(submission: CreateSubmissionRequest): F[Submission] =
+  override def create(submission: Submission): F[Submission] =
     pool
       .use(session => session.prepare(SubmissionQueries.create).flatMap(ps => ps.unique(submission)))
 
