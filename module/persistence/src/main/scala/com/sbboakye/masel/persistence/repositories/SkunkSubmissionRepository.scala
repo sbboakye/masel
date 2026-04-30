@@ -27,22 +27,22 @@ class SkunkSubmissionRepository[F[_]: Concurrent](pool: Resource[F, Session[F]])
     pool
       .use(session => session.prepare(SubmissionQueries.create).flatMap(ps => ps.unique(submission)))
 
-  override def update(submission: UpdateSubmissionRequest): F[Option[Boolean]] =
+  override def update(submission: UpdateSubmissionRequest): F[Boolean] =
     pool.use { session =>
       session.prepare(SubmissionQueries.update).flatMap { ps =>
         ps.execute(submission).map {
-          case Completion.Update(0) => None
-          case Completion.Update(n) => Some(n > 0)
+          case Completion.Update(0) => false
+          case Completion.Update(n) => true
         }
       }
     }
 
-  override def delete(id: SubmissionId): F[Option[Boolean]] =
+  override def delete(id: SubmissionId): F[Boolean] =
     pool.use { session =>
       session.prepare(SubmissionQueries.delete).flatMap { ps =>
         ps.execute(id).map {
-          case Completion.Delete(0) => None
-          case Completion.Delete(n) => Some(n > 0)
+          case Completion.Delete(0) => false
+          case Completion.Delete(n) => true
         }
       }
     }

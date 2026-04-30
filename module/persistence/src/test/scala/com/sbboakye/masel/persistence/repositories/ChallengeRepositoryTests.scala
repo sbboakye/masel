@@ -96,7 +96,7 @@ class ChallengeRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Match
               updatedAt = now,
             )
             updated <- repo.update(challengeUpdate)
-          } yield updated shouldBe None
+          } yield updated shouldBe false
         }
 
       "should return true to be updated does exist" in
@@ -117,7 +117,7 @@ class ChallengeRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Match
               updatedAt = now,
             )
             updated <- repo.update(challengeUpdate)
-          } yield updated shouldBe Some(true)
+          } yield updated shouldBe true
         }
     }
 
@@ -130,7 +130,7 @@ class ChallengeRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Match
             _ <- repo.create(challenge)
             id <- ChallengeId.generate[IO]
             deleted <- repo.delete(id)
-          } yield deleted shouldBe None
+          } yield deleted shouldBe false
         }
 
       "should return Some(true) if challenge to be deleted exist" in
@@ -140,7 +140,7 @@ class ChallengeRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Match
             challenge <- challengeIOOne
             _ <- repo.create(challenge)
             updated <- repo.delete(challenge.id)
-          } yield updated shouldBe Some(true)
+          } yield updated shouldBe true
         }
     }
   }
