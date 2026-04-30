@@ -5,6 +5,8 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 import io.github.iltotore.iron.circe.given
 
+import java.time.OffsetDateTime
+
 case class UpdateChallengeRequest(
     id: ChallengeId,
     title: NonEmptyString,
@@ -13,6 +15,7 @@ case class UpdateChallengeRequest(
     expectedSolution: NonEmptyString,
     allottedTime: PositiveInt,
     difficulty: ChallengeDifficulty,
+    updatedAt: OffsetDateTime,
 )
 
 object UpdateChallengeRequest:

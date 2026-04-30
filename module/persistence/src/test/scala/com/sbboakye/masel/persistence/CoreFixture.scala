@@ -2,9 +2,10 @@ package com.sbboakye.masel.persistence
 
 import cats.*
 import cats.effect.{Clock, IO}
-import com.sbboakye.masel.core.domain.ChallengeDifficulty.Easy
+import com.sbboakye.masel.core.domain.ChallengeDifficulty.{Easy, Hard}
 import com.sbboakye.masel.core.domain.ChallengeStatus.Draft
-import com.sbboakye.masel.core.domain.{Challenge, ChallengeId, Submission, SubmissionId}
+import com.sbboakye.masel.core.domain.dto.UpdateChallengeRequest
+import com.sbboakye.masel.core.domain.{Challenge, ChallengeId, ChallengeStatus, Submission, SubmissionId}
 import io.github.iltotore.iron.autoRefine
 import java.time.{OffsetDateTime, ZoneOffset}
 
@@ -43,6 +44,21 @@ trait CoreFixture:
       updatedAt = now,
     )
   } yield challenge
+
+//  val challengeIOUpdate: IO[UpdateChallengeRequest] = for {
+//    id <- ChallengeId.generate[IO]
+//    now <- Clock[IO].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
+//    challenge = UpdateChallengeRequest(
+//      id = id,
+//      title = "Sum of Three Squares",
+//      instructions = "sum three squares",
+//      status = ChallengeStatus.Draft,
+//      expectedSolution = "x + x + y = yx",
+//      allottedTime = 600,
+//      difficulty = Hard,
+//      updatedAt = now,
+//    )
+//  } yield challenge
 
   val submissionIO: IO[Submission] = for {
     submissionId <- SubmissionId.generate[IO]
