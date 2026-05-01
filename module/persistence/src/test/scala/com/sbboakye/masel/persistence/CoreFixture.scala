@@ -45,21 +45,6 @@ trait CoreFixture:
     )
   } yield challenge
 
-//  val challengeIOUpdate: IO[UpdateChallengeRequest] = for {
-//    id <- ChallengeId.generate[IO]
-//    now <- Clock[IO].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
-//    challenge = UpdateChallengeRequest(
-//      id = id,
-//      title = "Sum of Three Squares",
-//      instructions = "sum three squares",
-//      status = ChallengeStatus.Draft,
-//      expectedSolution = "x + x + y = yx",
-//      allottedTime = 600,
-//      difficulty = Hard,
-//      updatedAt = now,
-//    )
-//  } yield challenge
-
   val submissionIO: IO[Submission] = for {
     submissionId <- SubmissionId.generate[IO]
     challengeId <- ChallengeId.generate[IO]

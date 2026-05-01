@@ -8,12 +8,12 @@ trait ChallengeRepository[F[_]]:
   def findAll(limit: Int, offset: Int): Stream[F, Challenge]
   def findById(id: ChallengeId): F[Option[Challenge]]
   def create(challenge: Challenge): F[Challenge]
-  def update(challenge: UpdateChallengeRequest): F[Boolean]
+  def update(challenge: UpdateChallengeRequest): F[Option[Challenge]]
   def delete(id: ChallengeId): F[Boolean]
 
 trait SubmissionRepository[F[_]]:
   def findAll(limit: Int, offset: Int): Stream[F, Submission]
   def findById(id: SubmissionId): F[Option[Submission]]
   def create(submission: Submission): F[Submission]
-  def update(submission: UpdateSubmissionRequest): F[Boolean]
+  def update(submission: UpdateSubmissionRequest): F[Option[Submission]]
   def delete(id: SubmissionId): F[Boolean]

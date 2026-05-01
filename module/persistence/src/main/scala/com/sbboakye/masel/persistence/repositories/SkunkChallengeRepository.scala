@@ -27,15 +27,8 @@ class SkunkChallengeRepository[F[_]: Concurrent](pool: Resource[F, Session[F]]) 
     pool
       .use(session => session.prepare(ChallengeQueries.create).flatMap(ps => ps.unique(challenge)))
 
-  override def update(challenge: UpdateChallengeRequest): F[Boolean] =
-    pool.use { session =>
-      session.prepare(ChallengeQueries.update).flatMap { ps =>
-        ps.execute(challenge).map {
-          case Completion.Update(0) => false
-          case Completion.Update(challenge) => true
-        }
-      }
-    }
+  override def update(challenge: UpdateChallengeRequest): F[Option[Challenge]] =
+    pool.use(session => session.prepare(ChallengeQueries.update).flatMap(ps => ps.option(challenge)))
 
   override def delete(id: ChallengeId): F[Boolean] =
     pool.use { session =>

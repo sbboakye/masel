@@ -96,7 +96,7 @@ class ChallengeRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Match
               updatedAt = now,
             )
             updated <- repo.update(challengeUpdate)
-          } yield updated shouldBe false
+          } yield updated shouldBe None
         }
 
       "should return true to be updated does exist" in
@@ -117,7 +117,7 @@ class ChallengeRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Match
               updatedAt = now,
             )
             updated <- repo.update(challengeUpdate)
-          } yield updated shouldBe true
+          } yield updated.isDefined shouldBe true
         }
     }
 

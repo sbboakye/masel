@@ -2,13 +2,26 @@ package com.sbboakye.masel.persistence.queries
 
 import cats.syntax.all.*
 import com.sbboakye.masel.core.domain.dto.UpdateChallengeRequest
-import com.sbboakye.masel.core.domain.{Challenge, ChallengeDifficulty, ChallengeId, ChallengeStatus}
-import com.sbboakye.masel.persistence.codec.SkunkCodec.{
-  challengeCodec,
-  challengeDifficulty,
-  challengeId,
-  challengeStatus,
+import com.sbboakye.masel.core.domain.{
+  Challenge,
+  ChallengeDifficulty,
+  ChallengeId,
+  ChallengeStatus,
+  NonEmptyString,
+  PositiveInt,
 }
+import com.sbboakye.masel.persistence.codec.SkunkCodec.{
+  challengeAllottedTime,
+  challengeCodec,
+  challengeCodecTypes,
+  challengeDifficulty,
+  challengeExpectedSolutions,
+  challengeId,
+  challengeInstructions,
+  challengeStatus,
+  challengeTitle,
+}
+import io.github.iltotore.iron.autoRefine
 import skunk.*
 import skunk.codec.all.*
 import skunk.implicits.*
@@ -59,19 +72,31 @@ object ChallengeQueries:
       RETURNING id, title, instructions, status, expected_solution, output, allotted_time, difficulty, created_at, updated_at
     """.query(challengeCodec)
 
-  def update: Command[UpdateChallengeRequest] =
+  def update: Query[UpdateChallengeRequest, Challenge] =
     sql"""
       UPDATE challenges
-      SET title = $varchar,
-          instructions = $text,
+      SET title = $challengeTitle,
+          instructions = $challengeInstructions,
           status = $challengeStatus,
-          expected_solution = $text,
-          allotted_time = $int4,
-          difficulty = $challengeDifficulty
+          expected_solution = $challengeExpectedSolutions,
+          allotted_time = $challengeAllottedTime,
+          difficulty = $challengeDifficulty,
+          updated_at = $timestamptz
       WHERE id = $challengeId
-    """.command
-      .contramap[UpdateChallengeRequest] { c =>
-        (c.title, c.instructions, c.status, c.expectedSolution, c.allottedTime, c.difficulty, c.id)
+      RETURNING id, title, instructions, status, expected_solution, output, allotted_time, difficulty, created_at, updated_at
+    """
+      .query(challengeCodec)
+      .contramap[UpdateChallengeRequest] { req =>
+        (
+          (req.title: NonEmptyString),
+          (req.instructions: NonEmptyString),
+          req.status,
+          (req.expectedSolution: NonEmptyString),
+          (req.allottedTime: PositiveInt),
+          req.difficulty,
+          req.updatedAt,
+          req.id,
+        )
       }
 
   def delete: Command[ChallengeId] =
