@@ -4,8 +4,7 @@ import cats.*
 import cats.effect.testing.scalatest.AsyncIOSpec
 import cats.effect.{Clock, IO}
 import com.sbboakye.masel.core.domain.ChallengeDifficulty.Hard
-import com.sbboakye.masel.core.domain.dto.UpdateChallengeRequest
-import com.sbboakye.masel.core.domain.{ChallengeId, ChallengeStatus}
+import com.sbboakye.masel.core.domain.{Challenge, ChallengeId, ChallengeStatus}
 import com.sbboakye.masel.persistence.{CoreFixture, CoreSpec}
 import io.github.iltotore.iron.autoRefine
 import java.time.ZoneOffset
@@ -81,16 +80,18 @@ class ChallengeRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Match
           for {
             challenge <- challengeIOOne
             _ <- repo.create(challenge)
-            id <- ChallengeId.generate[IO]
+            randomId <- ChallengeId.generate[IO]
             now <- Clock[IO].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
-            challengeUpdate = UpdateChallengeRequest(
-              id = id,
+            challengeUpdate = Challenge(
+              id = randomId,
               title = "Sum of Three Squares",
               instructions = "sum three squares",
               status = ChallengeStatus.Draft,
               expectedSolution = "x + x + y = yx",
+              output = None,
               allottedTime = 600,
               difficulty = Hard,
+              createdAt = now,
               updatedAt = now,
             )
             updated <- repo.update(challengeUpdate)
@@ -104,12 +105,13 @@ class ChallengeRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Match
             challenge <- challengeIOOne
             _ <- repo.create(challenge)
             now <- Clock[IO].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
-            challengeUpdate = UpdateChallengeRequest(
+            challengeUpdate = challenge.copy(
               id = challenge.id,
               title = "Sum of Three Squares",
               instructions = "sum three squares",
               status = ChallengeStatus.Draft,
               expectedSolution = "x + x + y = yx",
+              output = None,
               allottedTime = 600,
               difficulty = Hard,
               updatedAt = now,

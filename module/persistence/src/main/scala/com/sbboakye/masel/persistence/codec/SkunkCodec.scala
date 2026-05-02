@@ -1,6 +1,5 @@
 package com.sbboakye.masel.persistence.codec
 
-import com.sbboakye.masel.core.domain.dto.{UpdateChallengeRequest, UpdateSubmissionRequest}
 import com.sbboakye.masel.core.domain.{
   Challenge,
   ChallengeDifficulty,

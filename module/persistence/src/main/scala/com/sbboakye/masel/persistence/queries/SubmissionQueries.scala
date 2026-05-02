@@ -1,10 +1,17 @@
 package com.sbboakye.masel.persistence.queries
 
 import cats.syntax.all.*
-import com.sbboakye.masel.core.domain.dto.UpdateSubmissionRequest
 import com.sbboakye.masel.core.domain.{NonEmptyString, Submission, SubmissionId}
-import com.sbboakye.masel.persistence.codec.SkunkCodec.{submissionCodec, submissionId, submissionSolution}
+import com.sbboakye.masel.persistence.codec.SkunkCodec.{
+  submissionCodec,
+  submissionId,
+  submissionScore,
+  submissionSolution,
+}
+import io.github.iltotore.iron.*
+import io.github.iltotore.iron.constraint.all.*
 import skunk.*
+import skunk.circe.codec.all.*
 import skunk.codec.all.*
 import skunk.implicits.*
 
@@ -48,17 +55,19 @@ object SubmissionQueries:
         RETURNING id, challenge_id, candidate_solution, output, score, created_at, updated_at
     """.query(submissionCodec)
 
-  def update: Query[UpdateSubmissionRequest, Submission] =
+  def update: Query[Submission, Submission] =
     sql"""
         UPDATE submissions
         SET
             candidate_solution = $submissionSolution,
+            output = ${jsonb.opt},
+            score = ${submissionScore.opt},
             updated_at = $timestamptz
         WHERE id = $submissionId
         RETURNING id, challenge_id, candidate_solution, output, score, created_at, updated_at
       """
       .query(submissionCodec)
-      .contramap[UpdateSubmissionRequest](s => (s.candidateSolution: NonEmptyString, s.updatedAt, s.id))
+      .contramap[Submission](s => (s.candidateSolution: NonEmptyString, s.output, s.score, s.updatedAt, s.id))
 
   def delete: Command[SubmissionId] =
     sql"""

@@ -3,8 +3,7 @@ package com.sbboakye.masel.persistence.repositories
 import cats.*
 import cats.effect.testing.scalatest.AsyncIOSpec
 import cats.effect.{Clock, IO}
-import com.sbboakye.masel.core.domain.SubmissionId
-import com.sbboakye.masel.core.domain.dto.UpdateSubmissionRequest
+import com.sbboakye.masel.core.domain.{Submission, SubmissionId}
 import com.sbboakye.masel.persistence.{CoreFixture, CoreSpec}
 import io.github.iltotore.iron.autoRefine
 import java.time.ZoneOffset
@@ -99,9 +98,13 @@ class SubmissionRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Matc
             _ <- submissionRepo.create(submission)
             id <- SubmissionId.generate[IO]
             now <- Clock[IO].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
-            submissionUpdate = UpdateSubmissionRequest(
+            submissionUpdate = Submission(
               id = id,
+              challengeId = challengeOne.id,
               candidateSolution = "x + x = y + x",
+              output = None,
+              score = None,
+              createdAt = now,
               updatedAt = now,
             )
             updated <- submissionRepo.update(submissionUpdate)
@@ -118,9 +121,12 @@ class SubmissionRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Matc
             submission <- submissionIO(challengeOne.id)
             _ <- submissionRepo.create(submission)
             now <- Clock[IO].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
-            submissionUpdate = UpdateSubmissionRequest(
+            submissionUpdate = submission.copy(
               id = submission.id,
+              challengeId = challengeOne.id,
               candidateSolution = "x + x = y + x",
+              output = None,
+              score = None,
               updatedAt = now,
             )
             updated <- submissionRepo.update(submissionUpdate)

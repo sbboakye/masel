@@ -1,7 +1,6 @@
 package com.sbboakye.masel.persistence.queries
 
 import cats.syntax.all.*
-import com.sbboakye.masel.core.domain.dto.UpdateChallengeRequest
 import com.sbboakye.masel.core.domain.{
   Challenge,
   ChallengeDifficulty,
@@ -23,6 +22,7 @@ import com.sbboakye.masel.persistence.codec.SkunkCodec.{
 }
 import io.github.iltotore.iron.autoRefine
 import skunk.*
+import skunk.circe.codec.all.jsonb
 import skunk.codec.all.*
 import skunk.implicits.*
 
@@ -72,13 +72,14 @@ object ChallengeQueries:
       RETURNING id, title, instructions, status, expected_solution, output, allotted_time, difficulty, created_at, updated_at
     """.query(challengeCodec)
 
-  def update: Query[UpdateChallengeRequest, Challenge] =
+  def update: Query[Challenge, Challenge] =
     sql"""
       UPDATE challenges
       SET title = $challengeTitle,
           instructions = $challengeInstructions,
           status = $challengeStatus,
           expected_solution = $challengeExpectedSolutions,
+          output = ${jsonb.opt},
           allotted_time = $challengeAllottedTime,
           difficulty = $challengeDifficulty,
           updated_at = $timestamptz
@@ -86,16 +87,17 @@ object ChallengeQueries:
       RETURNING id, title, instructions, status, expected_solution, output, allotted_time, difficulty, created_at, updated_at
     """
       .query(challengeCodec)
-      .contramap[UpdateChallengeRequest] { req =>
+      .contramap[Challenge] { c =>
         (
-          (req.title: NonEmptyString),
-          (req.instructions: NonEmptyString),
-          req.status,
-          (req.expectedSolution: NonEmptyString),
-          (req.allottedTime: PositiveInt),
-          req.difficulty,
-          req.updatedAt,
-          req.id,
+          (c.title: NonEmptyString),
+          (c.instructions: NonEmptyString),
+          c.status,
+          (c.expectedSolution: NonEmptyString),
+          c.output,
+          (c.allottedTime: PositiveInt),
+          c.difficulty,
+          c.updatedAt,
+          c.id,
         )
       }
 

@@ -2,7 +2,6 @@ package com.sbboakye.masel.persistence.repositories
 
 import cats.effect.*
 import cats.syntax.all.*
-import com.sbboakye.masel.core.domain.dto.UpdateChallengeRequest
 import com.sbboakye.masel.core.domain.{Challenge, ChallengeId}
 import com.sbboakye.masel.core.ports.ChallengeRepository
 import com.sbboakye.masel.persistence.queries.ChallengeQueries
@@ -29,7 +28,7 @@ class SkunkChallengeRepository[F[_]: Concurrent](pool: Resource[F, Session[F]])
     pool
       .use(session => session.prepare(ChallengeQueries.create).flatMap(ps => ps.unique(challenge)))
 
-  override def update(challenge: UpdateChallengeRequest): F[Option[Challenge]] =
+  override def update(challenge: Challenge): F[Option[Challenge]] =
     pool.use(session => session.prepare(ChallengeQueries.update).flatMap(ps => ps.option(challenge)))
 
   override def delete(id: ChallengeId): F[Boolean] =
