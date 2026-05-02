@@ -10,7 +10,9 @@ import fs2.Stream
 import skunk.Session
 import skunk.data.Completion
 
-class SkunkChallengeRepository[F[_]: Concurrent](pool: Resource[F, Session[F]]) extends ChallengeRepository[F]:
+class SkunkChallengeRepository[F[_]: Concurrent](pool: Resource[F, Session[F]])
+    extends ChallengeRepository[F]
+    with Helpers:
   override def findAll(limit: Int, offset: Int): Stream[F, Challenge] =
     Stream
       .resource(pool)
@@ -31,11 +33,4 @@ class SkunkChallengeRepository[F[_]: Concurrent](pool: Resource[F, Session[F]]) 
     pool.use(session => session.prepare(ChallengeQueries.update).flatMap(ps => ps.option(challenge)))
 
   override def delete(id: ChallengeId): F[Boolean] =
-    pool.use { session =>
-      session.prepare(ChallengeQueries.delete).flatMap { ps =>
-        ps.execute(id).map {
-          case Completion.Delete(0) => false
-          case Completion.Delete(n) => true
-        }
-      }
-    }
+    pool.use(session => session.prepare(ChallengeQueries.delete).flatMap(ps => ps.execute(id).flatMap(wasDeleted)))

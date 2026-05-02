@@ -2,14 +2,12 @@ package com.sbboakye.masel.persistence
 
 import cats.*
 import cats.effect.{IO, Resource}
-import cats.syntax.all.*
 import com.dimafeng.testcontainers.{JdbcDatabaseContainer, PostgreSQLContainer}
 import com.sbboakye.masel.persistence.session.PoolSession
 import org.testcontainers.utility.DockerImageName
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import skunk.*
-import skunk.implicits.*
 
 trait CoreSpec:
   val initSqlString: String
@@ -42,14 +40,3 @@ trait CoreSpec:
       maxPoolSize = 1,
     ).poolSession
   } yield pool
-
-//  def executeSqlScript(scriptPath: String)(using pool: Resource[IO, Session[IO]]): IO[Unit] =
-//    val script = scala.io.Source.fromResource(scriptPath).mkString
-//    val statements = script.split(";").filter(_.trim.nonEmpty)
-//    statements.toList.traverse { sqlScript =>
-//      val sqlCommand = sql"$sqlScript".command
-//      pool.use { session =>
-//        session.prepare(sqlCommand)
-//      }
-//    }
-//    IO.unit

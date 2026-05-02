@@ -40,3 +40,4 @@ lazy val root = (project in file("."))
   .settings(
     name := "masel",
   )
+  .aggregate(core, engine, persistence, app)

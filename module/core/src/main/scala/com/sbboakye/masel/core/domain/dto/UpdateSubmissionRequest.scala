@@ -8,6 +8,7 @@ import io.github.iltotore.iron.circe.given
 case class UpdateSubmissionRequest(
     id: SubmissionId,
     candidateSolution: NonEmptyString,
+    updatedAt: java.time.OffsetDateTime,
 )
 
 object UpdateSubmissionRequest:

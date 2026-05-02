@@ -2,12 +2,11 @@ package com.sbboakye.masel.persistence
 
 import cats.*
 import cats.effect.{Clock, IO}
-import com.sbboakye.masel.core.domain.ChallengeDifficulty.{Easy, Hard}
+import com.sbboakye.masel.core.domain.ChallengeDifficulty.Easy
 import com.sbboakye.masel.core.domain.ChallengeStatus.Draft
-import com.sbboakye.masel.core.domain.dto.UpdateChallengeRequest
-import com.sbboakye.masel.core.domain.{Challenge, ChallengeId, ChallengeStatus, Submission, SubmissionId}
+import com.sbboakye.masel.core.domain.{Challenge, ChallengeId, Submission, SubmissionId}
 import io.github.iltotore.iron.autoRefine
-import java.time.{OffsetDateTime, ZoneOffset}
+import java.time.ZoneOffset
 
 trait CoreFixture:
 
@@ -45,9 +44,8 @@ trait CoreFixture:
     )
   } yield challenge
 
-  val submissionIO: IO[Submission] = for {
+  def submissionIO(challengeId: ChallengeId): IO[Submission] = for {
     submissionId <- SubmissionId.generate[IO]
-    challengeId <- ChallengeId.generate[IO]
     now <- Clock[IO].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
     submission = Submission(
       id = submissionId,
@@ -60,16 +58,16 @@ trait CoreFixture:
     )
   } yield submission
 
-  val submissionWithScoreIO: IO[Submission] = for {
+  def submissionWithScoreIO(challengeId: ChallengeId): IO[Submission] = for {
     submissionId <- SubmissionId.generate[IO]
-    challengeId <- ChallengeId.generate[IO]
+    now <- Clock[IO].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
     submission = Submission(
       id = submissionId,
       challengeId = challengeId,
       candidateSolution = "x + x = y",
       output = None,
       score = Some(90),
-      createdAt = OffsetDateTime.now(),
-      updatedAt = OffsetDateTime.now(),
+      createdAt = now,
+      updatedAt = now,
     )
   } yield submission

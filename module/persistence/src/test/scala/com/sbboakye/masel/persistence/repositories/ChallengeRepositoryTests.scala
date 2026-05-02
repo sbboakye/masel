@@ -14,7 +14,6 @@ import org.scalatest.matchers.should.Matchers
 
 class ChallengeRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Matchers with CoreSpec with CoreFixture:
   override val initSqlString: String = "db/migration/V1__initial_schema.sql"
-  val additionalScript: String = "challenges.sql"
 
   "ChallengeRepository" - {
     "findAll" - {
@@ -35,7 +34,6 @@ class ChallengeRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Match
             _ <- repo.create(challengeOne)
             _ <- repo.create(challengeTwo)
             list <- repo.findAll(10, 0).compile.toList
-            _ <- IO.println(s"List of challenges: $list")
           } yield list
           result.asserting(_ should not be empty)
         }
@@ -51,7 +49,7 @@ class ChallengeRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Match
             randomId <- ChallengeId.generate[IO]
             find <- repo.findById(randomId)
           } yield find
-          result.asserting(maybeChallenge => maybeChallenge shouldBe None)
+          result.asserting(_ shouldBe None)
         }
 
       "should return Some(Challenge) if challenge exists" in
@@ -99,7 +97,7 @@ class ChallengeRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Match
           } yield updated shouldBe None
         }
 
-      "should return true to be updated does exist" in
+      "should return true if challenge to be updated does exist" in
         poolSession.use { pool =>
           val repo = SkunkChallengeRepository[IO](pool)
           for {
@@ -122,18 +120,18 @@ class ChallengeRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Match
     }
 
     "delete" - {
-      "should return None if challenge to be deleted does not exist" in
+      "should return false if challenge to be deleted does not exist" in
         poolSession.use { pool =>
           val repo = SkunkChallengeRepository[IO](pool)
           for {
             challenge <- challengeIOOne
             _ <- repo.create(challenge)
-            id <- ChallengeId.generate[IO]
-            deleted <- repo.delete(id)
+            randomId <- ChallengeId.generate[IO]
+            deleted <- repo.delete(randomId)
           } yield deleted shouldBe false
         }
 
-      "should return Some(true) if challenge to be deleted exist" in
+      "should return true if challenge to be deleted exist" in
         poolSession.use { pool =>
           val repo = SkunkChallengeRepository[IO](pool)
           for {

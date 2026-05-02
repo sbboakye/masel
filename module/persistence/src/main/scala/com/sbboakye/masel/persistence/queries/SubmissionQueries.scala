@@ -52,12 +52,13 @@ object SubmissionQueries:
     sql"""
         UPDATE submissions
         SET
-            candidate_solution = $submissionSolution
+            candidate_solution = $submissionSolution,
+            updated_at = $timestamptz
         WHERE id = $submissionId
         RETURNING id, challenge_id, candidate_solution, output, score, created_at, updated_at
       """
       .query(submissionCodec)
-      .contramap[UpdateSubmissionRequest](s => (s.candidateSolution: NonEmptyString, s.id))
+      .contramap[UpdateSubmissionRequest](s => (s.candidateSolution: NonEmptyString, s.updatedAt, s.id))
 
   def delete: Command[SubmissionId] =
     sql"""
