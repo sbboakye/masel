@@ -1,9 +1,10 @@
 package com.sbboakye.masel.core.domain
 
-import org.scalatest.freespec.AnyFreeSpec
+import cats.effect.testing.scalatest.AsyncIOSpec
+import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-class SubmissionCreationTest extends AnyFreeSpec with Matchers with CoreFixture:
+class SubmissionCreationTest extends AsyncFreeSpec with AsyncIOSpec with Matchers with CoreFixture:
   "Submission creation logic" - {
     "create" - {
       "should create a valid submission" in
@@ -16,8 +17,6 @@ class SubmissionCreationTest extends AnyFreeSpec with Matchers with CoreFixture:
         }
 
       "should create a submission with valid score" in
-        submissionWithScoreIO.map { submission =>
-          submission.score.get >= 0 && submission.score.get <= 100
-        }
+        submissionWithScoreIO.map(submission => submission.score.get >= 0 && submission.score.get <= 100 shouldBe true)
     }
   }

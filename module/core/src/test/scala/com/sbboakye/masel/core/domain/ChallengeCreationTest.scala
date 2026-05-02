@@ -1,9 +1,10 @@
 package com.sbboakye.masel.core.domain
 
-import org.scalatest.freespec.AnyFreeSpec
+import cats.effect.testing.scalatest.AsyncIOSpec
+import org.scalatest.freespec.{AnyFreeSpec, AsyncFreeSpec}
 import org.scalatest.matchers.should.Matchers
 
-class ChallengeCreationTest extends AnyFreeSpec with Matchers with CoreFixture:
+class ChallengeCreationTest extends AsyncFreeSpec with AsyncIOSpec with Matchers with CoreFixture:
   "Challenge creation logic" - {
     "create" - {
       "should create a valid challenge" in
@@ -12,7 +13,7 @@ class ChallengeCreationTest extends AnyFreeSpec with Matchers with CoreFixture:
           challenge.output shouldBe None
           challenge.status shouldBe ChallengeStatus.Draft
           challenge.difficulty shouldBe ChallengeDifficulty.Easy
-          challenge.allottedTime >= 0
+          challenge.allottedTime >= 0 shouldBe true
         }
     }
   }

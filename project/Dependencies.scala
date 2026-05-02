@@ -76,8 +76,6 @@ object Dependencies {
   val logback = "ch.qos.logback" % "logback-classic" % Versions.logback
 
   // Testing
-  val munit = "org.scalameta" %% "munit" % Versions.munit % Test
-  val munitCatsEffect = "org.typelevel" %% "munit-cats-effect" % Versions.munitCatsEffect % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % Versions.scalaCheck % Test
   val scalactic = "org.scalactic" %% "scalactic" % Versions.scalatest % Test
   val scalacTest = "org.scalatest" %% "scalatest" % Versions.scalatest % Test
@@ -116,6 +114,6 @@ object Dependencies {
   )
 
   val testDeps: Seq[ModuleID] =
-    Seq(munit, munitCatsEffect, scalaCheck, testcontainersMunit, scalactic, scalacTest, catsEffectTest)
+    Seq(scalaCheck, testcontainersMunit, scalactic, scalacTest, catsEffectTest)
 
 }

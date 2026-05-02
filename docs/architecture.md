@@ -6,20 +6,20 @@ SaaS platform for realistic data engineering interview assessments: sandboxed co
 
 ## Tech Stack
 
-| Concern              | Choice                          |
-| -------------------- | ------------------------------- |
-| Language             | Scala 3                         |
-| FP Core              | Cats + Cats Effect 3            |
-| HTTP                 | http4s                          |
-| Database             | Postgres via Skunk              |
-| Migrations           | Flyway                          |
-| Streaming            | fs2                             |
-| JSON                 | circe + circe-yaml              |
-| Config               | ciris                           |
-| Logging              | log4cats + Logback              |
-| Testing              | MUnit + ScalaCheck              |
-| Refinement types     | Iron (Scala 3 native)           |
-| Build                | sbt                             |
+| Concern              | Choice                 |
+| -------------------- |------------------------|
+| Language             | Scala 3                |
+| FP Core              | Cats + Cats Effect 3   |
+| HTTP                 | http4s                 |
+| Database             | Postgres via Skunk     |
+| Migrations           | Flyway                 |
+| Streaming            | fs2                    |
+| JSON                 | circe + circe-yaml     |
+| Config               | ciris                  |
+| Logging              | log4cats + Logback     |
+| Testing              | Scalatest + ScalaCheck |
+| Refinement types     | Iron (Scala 3 native)  |
+| Build                | sbt                    |
 
 ## Architecture
 
