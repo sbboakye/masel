@@ -35,7 +35,6 @@ object AppConfig:
   def loadF[F[_]: Async]: F[AppConfig] =
     val databaseConfig: ConfigValue[Effect, DatabaseConfig] =
       (
-//        env("DB_URL").as[NonEmptyString].default("jdbc:postgresql://localhost:5432/masel"),
         env("DB_HOST").as[Host].default(ipv4"127.0.0.1"),
         env("DB_PORT").as[Port].default(port"5432"),
         env("DB_USERNAME").as[NonEmptyString].default("masel"),

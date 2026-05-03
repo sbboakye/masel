@@ -7,15 +7,15 @@ object Dependencies {
     val cats = "2.13.0"
     val catsEffect = "3.7.0"
     val fs2 = "3.13.0"
-    val iron = "3.3.0"
+    val iron = "3.3.1"
 
     // Http API
     val http4s = "0.23.34"
 
     // Database
     val skunk = "1.0.0"
-    val flyway = "12.4.0"
-    val postgresql = "42.7.10"
+    val flyway = "12.5.0"
+    val postgresql = "42.7.11"
 
     // JSON
     val circe = "0.14.15"
@@ -86,7 +86,20 @@ object Dependencies {
 
   // Dependency groups
   val coreDeps: Seq[ModuleID] =
-    Seq(cats, catsEffect, fs2Core, fs2IO, circeCore, circeGeneric, ironCore, ironCirce, ironCiris, ironCats)
+    Seq(
+      cats,
+      catsEffect,
+      fs2Core,
+      fs2IO,
+      circeCore,
+      circeGeneric,
+      ironCore,
+      ironCirce,
+      ironCiris,
+      ironCats,
+      skunkCore,
+      skunkCirce,
+    )
 
   val persistenceDeps: Seq[ModuleID] =
     Seq(cats, catsEffect, skunkCore, skunkCirce, postgresql, flyway, flywayPostgres, log4catsSlf4j)

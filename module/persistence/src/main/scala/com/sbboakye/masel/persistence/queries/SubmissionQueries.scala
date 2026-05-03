@@ -2,12 +2,7 @@ package com.sbboakye.masel.persistence.queries
 
 import cats.syntax.all.*
 import com.sbboakye.masel.core.domain.{NonEmptyString, Submission, SubmissionId}
-import com.sbboakye.masel.persistence.codec.SkunkCodec.{
-  submissionCodec,
-  submissionId,
-  submissionScore,
-  submissionSolution,
-}
+import com.sbboakye.masel.persistence.codec.SkunkCodec.{domainText, submissionCodec, submissionId, submissionScore}
 import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*
 import skunk.*
@@ -59,7 +54,7 @@ object SubmissionQueries:
     sql"""
         UPDATE submissions
         SET
-            candidate_solution = $submissionSolution,
+            candidate_solution = $domainText,
             output = ${jsonb.opt},
             score = ${submissionScore.opt},
             updated_at = $timestamptz

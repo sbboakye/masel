@@ -3,6 +3,8 @@ package com.sbboakye.masel.core.domain
 import cats.effect.Sync
 import io.circe.{Decoder, Encoder}
 import java.util.UUID
+import skunk.*
+import skunk.codec.all.*
 
 opaque type ChallengeId = UUID
 opaque type SubmissionId = UUID

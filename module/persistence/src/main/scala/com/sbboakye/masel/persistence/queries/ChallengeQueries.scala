@@ -10,15 +10,14 @@ import com.sbboakye.masel.core.domain.{
   PositiveInt,
 }
 import com.sbboakye.masel.persistence.codec.SkunkCodec.{
-  challengeAllottedTime,
   challengeCodec,
   challengeCodecTypes,
   challengeDifficulty,
-  challengeExpectedSolutions,
   challengeId,
-  challengeInstructions,
   challengeStatus,
-  challengeTitle,
+  domainPositiveInt,
+  domainText,
+  domainVarchar,
 }
 import io.github.iltotore.iron.autoRefine
 import skunk.*
@@ -75,12 +74,12 @@ object ChallengeQueries:
   def update: Query[Challenge, Challenge] =
     sql"""
       UPDATE challenges
-      SET title = $challengeTitle,
-          instructions = $challengeInstructions,
+      SET title = $domainVarchar,
+          instructions = $domainText,
           status = $challengeStatus,
-          expected_solution = $challengeExpectedSolutions,
+          expected_solution = $domainText,
           output = ${jsonb.opt},
-          allotted_time = $challengeAllottedTime,
+          allotted_time = $domainPositiveInt,
           difficulty = $challengeDifficulty,
           updated_at = $timestamptz
       WHERE id = $challengeId
