@@ -11,7 +11,6 @@ import com.sbboakye.masel.core.domain.{
 }
 import com.sbboakye.masel.persistence.codec.SkunkCodec.{
   challengeCodec,
-  challengeCodecTypes,
   challengeDifficulty,
   challengeId,
   challengeStatus,
@@ -19,7 +18,6 @@ import com.sbboakye.masel.persistence.codec.SkunkCodec.{
   domainText,
   domainVarchar,
 }
-import io.github.iltotore.iron.autoRefine
 import skunk.*
 import skunk.circe.codec.all.jsonb
 import skunk.codec.all.*

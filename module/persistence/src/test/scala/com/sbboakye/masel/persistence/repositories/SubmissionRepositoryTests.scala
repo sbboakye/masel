@@ -18,8 +18,7 @@ class SubmissionRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Matc
       "should return an empty stream with with no submissions" in
         poolSession.use { pool =>
           val repo = SkunkSubmissionRepository[IO](pool)
-          val stream = repo.findAll(10, 0)
-          val result = stream.compile.toList
+          val result = repo.findAll(10, 0)
           result.asserting(_ shouldBe empty)
         }
 
@@ -36,7 +35,7 @@ class SubmissionRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Matc
             submissionTwo <- submissionWithScoreIO(challengeTwo.id)
             _ <- submissionRepo.create(submissionOne)
             _ <- submissionRepo.create(submissionTwo)
-            list <- submissionRepo.findAll(10, 0).compile.toList
+            list <- submissionRepo.findAll(10, 0)
           } yield list
           result.asserting(_ should not be empty)
         }

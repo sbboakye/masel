@@ -5,21 +5,15 @@ import cats.syntax.all.*
 import com.sbboakye.masel.core.domain.{Challenge, ChallengeId}
 import com.sbboakye.masel.core.ports.ChallengeRepository
 import com.sbboakye.masel.persistence.queries.ChallengeQueries
-import fs2.Stream
 import skunk.Session
-import skunk.data.Completion
 
 class SkunkChallengeRepository[F[_]: Concurrent](pool: Resource[F, Session[F]])
     extends ChallengeRepository[F]
     with Helpers:
-  override def findAll(limit: Int, offset: Int): Stream[F, Challenge] =
-    Stream
-      .resource(pool)
-      .flatMap { session =>
-        Stream
-          .eval(session.prepare(ChallengeQueries.findAll))
-          .flatMap(ps => ps.stream((limit, offset), 10))
-      }
+  override def findAll(limit: Int, offset: Int): F[List[Challenge]] =
+    pool
+      .use(session => session.prepare(ChallengeQueries.findAll))
+      .flatMap(ps => ps.stream((limit, offset), limit).compile.toList)
 
   override def findById(id: ChallengeId): F[Option[Challenge]] =
     pool.use(session => session.prepare(ChallengeQueries.findById).flatMap(ps => ps.option(id)))

@@ -63,12 +63,10 @@ object Dependencies {
   val circeCore = "io.circe" %% "circe-core" % Versions.circe
   val circeGeneric = "io.circe" %% "circe-generic" % Versions.circe
   val circeParser = "io.circe" %% "circe-parser" % Versions.circe
-  val circeYaml = "io.circe" %% "circe-yaml" % Versions.circeYaml
 
   // Config
   val ciris = "is.cir" %% "ciris" % Versions.ciris
   val cirisCirce = "is.cir" %% "ciris-circe" % Versions.ciris
-  val cirisEnumeratum = "is.cir" %% "ciris-enumeratum" % Versions.ciris
   val cirisHttp4s = "is.cir" %% "ciris-http4s" % Versions.ciris
 
   // Logging
@@ -112,10 +110,8 @@ object Dependencies {
     circeCore,
     circeGeneric,
     circeParser,
-    circeYaml,
     ciris,
     cirisCirce,
-    cirisEnumeratum,
     cirisHttp4s,
     ironCiris,
     ironCats,

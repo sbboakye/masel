@@ -1,17 +1,16 @@
 package com.sbboakye.masel.core.ports
 
 import com.sbboakye.masel.core.domain.{Challenge, ChallengeId, Submission, SubmissionId}
-import fs2.Stream
 
 trait ChallengeRepository[F[_]]:
-  def findAll(limit: Int, offset: Int): Stream[F, Challenge]
+  def findAll(limit: Int, offset: Int): F[List[Challenge]]
   def findById(id: ChallengeId): F[Option[Challenge]]
   def create(challenge: Challenge): F[Challenge]
   def update(challenge: Challenge): F[Option[Challenge]]
   def delete(id: ChallengeId): F[Boolean]
 
 trait SubmissionRepository[F[_]]:
-  def findAll(limit: Int, offset: Int): Stream[F, Submission]
+  def findAll(limit: Int, offset: Int): F[List[Submission]]
   def findById(id: SubmissionId): F[Option[Submission]]
   def create(submission: Submission): F[Submission]
   def update(submission: Submission): F[Option[Submission]]

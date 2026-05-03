@@ -19,8 +19,7 @@ class ChallengeRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Match
       "should return an empty stream when no challenges exist" in
         poolSession.use { pool =>
           val repo = SkunkChallengeRepository[IO](pool)
-          val stream = repo.findAll(10, 0)
-          val result = stream.compile.toList
+          val result = repo.findAll(10, 0)
           result.asserting(_ shouldBe empty)
         }
 
@@ -32,7 +31,7 @@ class ChallengeRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Match
             challengeTwo <- challengeIOTwo
             _ <- repo.create(challengeOne)
             _ <- repo.create(challengeTwo)
-            list <- repo.findAll(10, 0).compile.toList
+            list <- repo.findAll(10, 0)
           } yield list
           result.asserting(_ should not be empty)
         }

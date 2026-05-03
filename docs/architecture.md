@@ -52,7 +52,7 @@ masel/
 ├── docker-compose.yml
 └── modules/
     ├── core/
-    │   └── src/main/scala/com/masel/core/
+    │   └── src/main/scala/com/sbboakye/masel/core/
     │       ├── domain/
     │       │   ├── ids.scala
     │       │   ├── challenge.scala
@@ -62,20 +62,20 @@ masel/
     │       └── errors/
     │           └── AppError.scala
     ├── persistence/
-    │   └── src/main/scala/com/masel/persistence/
+    │   └── src/main/scala/com/sbboakye/masel/persistence/
     │       ├── repositories/
     │       │   └── SkunkChallengeRepository.scala
     │       ├── queries/
     │       ├── meta/
     │       └── FlywayMigrator.scala
     ├── engine/
-    │   └── src/main/scala/com/masel/engine/
+    │   └── src/main/scala/com/sbboakye/masel/engine/
     │       ├── executor/
     │       │   ├── ChallengeValidation.scala
     │       │   └── SubmissionValidation.scala
     │       └── ports/
     └── app/
-        └── src/main/scala/com/masel/app/
+        └── src/main/scala/com/sbboakye/masel/app/
             ├── Main.scala
             ├── routes/
             ├── requests/

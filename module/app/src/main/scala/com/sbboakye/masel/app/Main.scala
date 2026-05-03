@@ -1,7 +1,9 @@
 package com.sbboakye.masel.app
 
+import cats.*
 import cats.effect.*
 import cats.effect.{ExitCode, IOApp}
+import cats.syntax.all.*
 import com.sbboakye.masel.persistence.FlywayMigrator
 import com.sbboakye.masel.persistence.repositories.{SkunkChallengeRepository, SkunkSubmissionRepository}
 import com.sbboakye.masel.persistence.session.PoolSession
@@ -33,8 +35,8 @@ object Main extends IOApp:
       )
       _ <- Resource.eval(logger.info("Database migration completed"))
       session <- PoolSession[IO](
-        host = config.database.host.toString,
-        port = config.database.port.toString.toInt,
+        host = config.database.host.show,
+        port = config.database.port.value,
         database = config.database.dbName,
         username = config.database.username,
         password = config.database.password.value,
