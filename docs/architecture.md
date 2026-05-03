@@ -166,7 +166,6 @@ CREATE TABLE submissions (
 - FK indexes on `submissions.challenge_id`
 - Index on `challenges.status`
 - CHECK constraints where appropriate
-- Shared `update_updated_at_column()` trigger function on both tables
 
 ## Error Handling
 

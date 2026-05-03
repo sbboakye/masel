@@ -12,8 +12,9 @@ class SkunkChallengeRepository[F[_]: Concurrent](pool: Resource[F, Session[F]])
     with Helpers:
   override def findAll(limit: Int, offset: Int): F[List[Challenge]] =
     pool
-      .use(session => session.prepare(ChallengeQueries.findAll))
-      .flatMap(ps => ps.stream((limit, offset), limit).compile.toList)
+      .use(session =>
+        session.prepare(ChallengeQueries.findAll).flatMap(ps => ps.stream((limit, offset), limit).compile.toList),
+      )
 
   override def findById(id: ChallengeId): F[Option[Challenge]] =
     pool.use(session => session.prepare(ChallengeQueries.findById).flatMap(ps => ps.option(id)))
