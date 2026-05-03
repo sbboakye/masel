@@ -9,6 +9,10 @@ type Base[T] = T match
 type ConstraintOf[T] = T match
   case a :| c => c
 
+/*
+encode is a no-op because T reduces to Base[T] :| ConstraintOf[T];
+we can't express the bound without recursion limits.
+ */
 def refined[T](base: Codec[Base[T]])(
     using rc: RuntimeConstraint[Base[T], ConstraintOf[T]],
 ): Codec[T] =
