@@ -4,6 +4,7 @@ import cats.*
 import cats.effect.*
 import cats.effect.{ExitCode, IOApp}
 import cats.syntax.all.*
+import com.sbboakye.masel.app.services.{ChallengeService, SubmissionService}
 import com.sbboakye.masel.persistence.FlywayMigrator
 import com.sbboakye.masel.persistence.repositories.{SkunkChallengeRepository, SkunkSubmissionRepository}
 import com.sbboakye.masel.persistence.session.PoolSession
@@ -47,6 +48,10 @@ object Main extends IOApp:
       // Repositories to be used later in phase 2 with services
       challengesRepo = SkunkChallengeRepository[IO](session)
       submissionRepo = SkunkSubmissionRepository[IO](session)
+
+      // Services
+      challengeService = ChallengeService[IO](challengesRepo)
+      submissionService = SubmissionService[IO](submissionRepo)
 
       httpApp = Router(
         "/" -> HttpRoutes.empty[IO],
