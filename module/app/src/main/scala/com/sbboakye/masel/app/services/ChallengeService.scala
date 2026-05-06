@@ -57,7 +57,9 @@ class ChallengeService[F[_]: {MonadThrow, Sync}](repo: ChallengeRepository[F]):
           val updated = existing.copy(
             title = request.title.getOrElse(existing.title),
             instructions = request.instructions.getOrElse(existing.instructions),
+            status = request.status.getOrElse(existing.status),
             expectedSolution = request.expectedSolution.getOrElse(existing.expectedSolution),
+            output = request.output,
             allottedTime = request.allottedTime.getOrElse(existing.allottedTime),
             difficulty = request.difficulty.getOrElse(existing.difficulty),
             updatedAt = now,
