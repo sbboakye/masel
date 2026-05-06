@@ -1,0 +1,49 @@
+package com.sbboakye.masel.app.services
+
+import cats.*
+import cats.effect.{Clock, Sync}
+import cats.syntax.all.*
+import com.sbboakye.masel.app.requests.CreateChallengeRequest
+import com.sbboakye.masel.core.domain.ChallengeStatus.Draft
+import com.sbboakye.masel.core.domain.{Challenge, ChallengeId}
+import com.sbboakye.masel.core.errors.AppError
+import com.sbboakye.masel.core.ports.ChallengeRepository
+import java.time.ZoneOffset
+
+class ChallengeService[F[_]: {MonadThrow, Sync}](repo: ChallengeRepository[F]):
+  def listChallenges(limit: Int, offset: Int): F[Either[AppError, List[Challenge]]] =
+    repo
+      .findAll(limit, offset)
+      .map(Right(_))
+      .handleErrorWith(e => MonadThrow[F].pure(Left(AppError.InternalError(e.getMessage, Some(e)))))
+
+  def getChallenge(id: ChallengeId): F[Either[AppError, Option[Challenge]]] =
+    repo
+      .findById(id)
+      .flatMap {
+        case Some(challenge) => MonadThrow[F].pure(Right(Some(challenge)))
+        case None => MonadThrow[F].pure(Left(AppError.NotFound("Challenge", id.value.toString)))
+      }
+      .handleErrorWith(e => MonadThrow[F].pure(Left(AppError.InternalError(e.getMessage, Some(e)))))
+
+  def createChallenge(request: CreateChallengeRequest): F[Either[AppError, Challenge]] =
+    for {
+      id <- ChallengeId.generate[F]
+      now <- Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
+      challenge = Challenge(
+        id = id,
+        title = request.title,
+        instructions = request.instructions,
+        status = Draft,
+        expectedSolution = request.expectedSolution,
+        output = None,
+        allottedTime = request.allottedTime,
+        difficulty = request.difficulty,
+        createdAt = now,
+        updatedAt = now,
+      )
+      created <- repo
+        .create(challenge)
+        .map(Right(_))
+        .handleErrorWith(e => MonadThrow[F].pure(Left(AppError.InternalError(e.getMessage, Some(e)))))
+    } yield created
