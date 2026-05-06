@@ -19,3 +19,16 @@ case class CreateChallengeRequest(
 object CreateChallengeRequest:
   given Encoder[CreateChallengeRequest] = deriveEncoder[CreateChallengeRequest]
   given Decoder[CreateChallengeRequest] = deriveDecoder[CreateChallengeRequest]
+
+case class UpdateChallengeRequest(
+    title: Option[NonEmptyString],
+    instructions: Option[NonEmptyString],
+    expectedSolution: Option[NonEmptyString],
+    allottedTime: Option[PositiveInt],
+    difficulty: Option[ChallengeDifficulty],
+    updatedAt: Option[java.time.OffsetDateTime],
+)
+
+object UpdateChallengeRequest:
+  given Encoder[UpdateChallengeRequest] = deriveEncoder[UpdateChallengeRequest]
+  given Decoder[UpdateChallengeRequest] = deriveDecoder[UpdateChallengeRequest]

@@ -3,7 +3,7 @@ package com.sbboakye.masel.app.services
 import cats.*
 import cats.effect.{Clock, Sync}
 import cats.syntax.all.*
-import com.sbboakye.masel.app.requests.CreateChallengeRequest
+import com.sbboakye.masel.app.requests.{CreateChallengeRequest, UpdateChallengeRequest}
 import com.sbboakye.masel.core.domain.ChallengeStatus.Draft
 import com.sbboakye.masel.core.domain.{Challenge, ChallengeId}
 import com.sbboakye.masel.core.errors.AppError
@@ -47,3 +47,36 @@ class ChallengeService[F[_]: {MonadThrow, Sync}](repo: ChallengeRepository[F]):
         .map(Right(_))
         .handleErrorWith(e => MonadThrow[F].pure(Left(AppError.InternalError(e.getMessage, Some(e)))))
     } yield created
+
+  def updateChallenge(id: ChallengeId, request: UpdateChallengeRequest): F[Either[AppError, Option[Challenge]]] =
+    for {
+      now <- Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
+      maybeUpdated <- repo.findById(id).flatMap {
+        case None => MonadThrow[F].pure(Left(AppError.NotFound("Challenge", id.value.toString)))
+        case Some(existing) =>
+          val updated = existing.copy(
+            title = request.title.getOrElse(existing.title),
+            instructions = request.instructions.getOrElse(existing.instructions),
+            expectedSolution = request.expectedSolution.getOrElse(existing.expectedSolution),
+            allottedTime = request.allottedTime.getOrElse(existing.allottedTime),
+            difficulty = request.difficulty.getOrElse(existing.difficulty),
+            updatedAt = now,
+          )
+          repo
+            .update(updated)
+            .map {
+              case Some(_) => Right(Some(updated))
+              case None => Left(AppError.NotFound("Challenge", id.value.toString))
+            }
+            .handleErrorWith(e => MonadThrow[F].pure(Left(AppError.InternalError(e.getMessage, Some(e)))))
+      }
+    } yield maybeUpdated
+
+  def deleteChallenge(id: ChallengeId): F[Either[AppError, Unit]] =
+    repo
+      .delete(id)
+      .map {
+        case true => Right(())
+        case false => Left(AppError.NotFound("Challenge", id.value.toString))
+      }
+      .handleErrorWith(e => MonadThrow[F].pure(Left(AppError.InternalError(e.getMessage, Some(e)))))
