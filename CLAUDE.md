@@ -40,18 +40,18 @@ All effectful code uses `F[_]: Sync` / `F[_]: Async` constraints. Services retur
 
 ## Tech Stack
 
-| Concern        | Library                       |
-|----------------|-------------------------------|
-| FP             | Cats + Cats Effect 3          |
-| HTTP           | http4s (Ember)                |
-| Database       | Skunk (Postgres)              |
-| Migrations     | Flyway                        |
-| Streaming      | fs2                           |
-| JSON           | circe + circe-yaml            |
-| Config         | ciris                         |
-| Logging        | log4cats + Logback            |
-| Refinement     | Iron (Scala 3 opaque types)   |
-| Testing        | MUnit + MUnit Cats Effect + ScalaCheck + Testcontainers |
+| Concern        | Library                                 |
+|----------------|-----------------------------------------|
+| FP             | Cats + Cats Effect 3                    |
+| HTTP           | http4s (Ember)                          |
+| Database       | Skunk (Postgres)                        |
+| Migrations     | Flyway                                  |
+| Streaming      | fs2                                     |
+| JSON           | circe + circe-yaml                      |
+| Config         | ciris                                   |
+| Logging        | log4cats + Logback                      |
+| Refinement     | Iron (Scala 3 opaque types)             |
+| Testing        | Scalatest + ScalaCheck + Testcontainers |
 
 ## Package Structure
 

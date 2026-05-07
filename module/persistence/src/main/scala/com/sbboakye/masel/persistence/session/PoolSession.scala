@@ -14,8 +14,17 @@ case class PoolSession[F[_]: {Async, Console}](
     username: String,
     password: String,
     maxPoolSize: Int,
-):
-  val poolSession: Resource[F, Resource[F, Session[F]]] = Session
+)
+
+object PoolSession:
+  def make[F[_]: {Async, Console}](
+      host: String,
+      port: Int,
+      database: String,
+      username: String,
+      password: String,
+      maxPoolSize: Int,
+  ): Resource[F, Resource[F, Session[F]]] = Session
     .Builder[F]
     .withHost(host)
     .withPort(port)

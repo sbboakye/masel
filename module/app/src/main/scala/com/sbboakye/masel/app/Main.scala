@@ -19,10 +19,10 @@ object Main extends IOApp:
   given LoggerFactory[IO] = Slf4jFactory.create[IO]
 
   def run(args: List[String]): IO[ExitCode] =
-    for {
+    for
       config <- AppConfig.loadF[IO]
       _ <- buildApp(config).useForever
-    } yield ExitCode.Success
+    yield ExitCode.Success
 
   private def buildApp(config: AppConfig): Resource[IO, Server] =
     for
@@ -35,14 +35,14 @@ object Main extends IOApp:
         ).migrate(),
       )
       _ <- Resource.eval(logger.info("Database migration completed"))
-      poolSession <- PoolSession[IO](
+      poolSession <- PoolSession.make[IO](
         host = config.database.host.show,
         port = config.database.port.value,
         database = config.database.dbName,
         username = config.database.username,
         password = config.database.password.value,
         maxPoolSize = config.database.maxPoolSize,
-      ).poolSession
+      )
       _ <- Resource.eval(logger.info("Database connection established"))
 
       session <- poolSession

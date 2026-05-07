@@ -46,6 +46,7 @@ build/
 
 ### Scala ###
 .bsp/
+*playground*
 
 ### Claude ###
 .claude

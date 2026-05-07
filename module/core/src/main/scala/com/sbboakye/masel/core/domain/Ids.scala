@@ -1,16 +1,15 @@
 package com.sbboakye.masel.core.domain
 
 import cats.effect.Sync
+import io.circe.syntax.*
 import io.circe.{Decoder, Encoder}
 import java.util.UUID
-import skunk.*
-import skunk.codec.all.*
 
 opaque type ChallengeId = UUID
 opaque type SubmissionId = UUID
 
 inline def uuidEncoder[A](inline valueOf: A => UUID): Encoder[A] =
-  Encoder.encodeString.contramap(a => valueOf(a).toString)
+  Encoder.encodeString.contramap(a => valueOf(a).asJson.toString)
 
 inline def uuidDecoder[A](inline wrap: UUID => A): Decoder[A] =
   Decoder.decodeString.emap(a => scala.util.Try(UUID.fromString(a)).toEither.left.map(_.getMessage).map(wrap))

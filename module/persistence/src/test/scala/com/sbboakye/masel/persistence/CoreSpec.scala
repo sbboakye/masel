@@ -31,12 +31,12 @@ trait CoreSpec:
 
   val poolSession: Resource[IO, Resource[IO, Session[IO]]] = for {
     db <- postgres
-    pool <- PoolSession[IO](
+    pool <- PoolSession.make[IO](
       host = db.containerIpAddress,
       port = db.mappedPort(5432),
       database = db.databaseName,
       username = db.username,
       password = db.password,
       maxPoolSize = 1,
-    ).poolSession
+    )
   } yield pool
