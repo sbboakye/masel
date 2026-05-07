@@ -9,7 +9,7 @@ opaque type ChallengeId = UUID
 opaque type SubmissionId = UUID
 
 inline def uuidEncoder[A](inline valueOf: A => UUID): Encoder[A] =
-  Encoder.encodeString.contramap(a => valueOf(a).asJson.toString)
+  Encoder.encodeString.contramap(a => valueOf(a).toString)
 
 inline def uuidDecoder[A](inline wrap: UUID => A): Decoder[A] =
   Decoder.decodeString.emap(a => scala.util.Try(UUID.fromString(a)).toEither.left.map(_.getMessage).map(wrap))

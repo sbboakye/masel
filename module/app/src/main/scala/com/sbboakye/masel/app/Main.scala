@@ -6,7 +6,7 @@ import cats.effect.{ExitCode, IOApp}
 import cats.syntax.all.*
 import com.sbboakye.masel.app.services.{ChallengeService, SubmissionService}
 import com.sbboakye.masel.persistence.FlywayMigrator
-import com.sbboakye.masel.persistence.repositories.{SkunkChallengeRepository, SkunkSubmissionRepository}
+import com.sbboakye.masel.persistence.repositories.{SkunkAppDb, SkunkChallengeRepository, SkunkSubmissionRepository}
 import com.sbboakye.masel.persistence.session.PoolSession
 import org.http4s.HttpRoutes
 import org.http4s.ember.server.EmberServerBuilder
@@ -35,7 +35,7 @@ object Main extends IOApp:
         ).migrate(),
       )
       _ <- Resource.eval(logger.info("Database migration completed"))
-      poolSession <- PoolSession.make[IO](
+      appPool <- PoolSession.make[IO](
         host = config.database.host.show,
         port = config.database.port.value,
         database = config.database.dbName,
@@ -45,15 +45,12 @@ object Main extends IOApp:
       )
       _ <- Resource.eval(logger.info("Database connection established"))
 
-      session <- poolSession
-
-      // Repositories to be used later in phase 2 with services
-      challengesRepo = SkunkChallengeRepository[IO](session)
-      submissionRepo = SkunkSubmissionRepository[IO](session)
+      // App DB
+      appDb = SkunkAppDb.make[IO](appPool)
 
       // Services
-      challengeService = ChallengeService[IO](challengesRepo)
-      submissionService = SubmissionService[IO](submissionRepo)
+      challengeService = ChallengeService[IO](appDb)
+      submissionService = SubmissionService[IO](appDb)
 
       httpApp = Router(
         "/" -> HttpRoutes.empty[IO],

@@ -15,3 +15,11 @@ trait SubmissionRepository[F[_]]:
   def create(submission: Submission): F[Submission]
   def update(submission: Submission): F[Option[Submission]]
   def delete(id: SubmissionId): F[Boolean]
+
+trait Repos[F[_]]:
+  def challenges: ChallengeRepository[F]
+  def submissions: SubmissionRepository[F]
+
+trait AppDb[F[_]]:
+  def run[A](use: Repos[F] => F[A]): F[A]
+  def transact[A](use: Repos[F] => F[A]): F[A]

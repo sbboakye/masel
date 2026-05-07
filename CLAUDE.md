@@ -90,6 +90,6 @@ Tables: `challenges`, `submissions` (FK: `submissions.challenge_id → challenge
 
 ## Current Status
 
-**Phase 1 (Foundation)** — in progress. Skeleton compiled; `FlywayMigrator` implemented; `Main.scala` is a stub returning `ExitCode.Success`. Next: wire ciris config, Skunk session pool, Flyway into `Main.scala`; implement repository port traits in `core`; implement Skunk adapters in `persistence`.
+**Phase 1 (Foundation)** — In Review. Skeleton compiled; `FlywayMigrator` implemented; `Main.scala` is implemented. Implemented: wire ciris config, Skunk session pool, Flyway into `Main.scala`; implement repository port traits in `core`; implement Skunk adapters in `persistence`.
 
 **Phase 2 (Executor Engine)** — not started. SQL execution in sandboxed containers, grading, HTTP routes.
