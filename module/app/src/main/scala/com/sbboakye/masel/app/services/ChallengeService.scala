@@ -11,7 +11,7 @@ import com.sbboakye.masel.core.errors.AppError
 import com.sbboakye.masel.core.ports.ChallengeRepository
 import java.time.ZoneOffset
 
-class ChallengeService[F[_]: {MonadThrow, Sync}](repo: ChallengeRepository[F]):
+class ChallengeService[F[_]: Sync](repo: ChallengeRepository[F]):
   def listChallenges(limit: Int, offset: Int): EitherT[F, AppError, List[Challenge]] =
     repo
       .findAll(limit, offset)

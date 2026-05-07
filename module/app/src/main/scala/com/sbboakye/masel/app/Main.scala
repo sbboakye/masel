@@ -35,7 +35,7 @@ object Main extends IOApp:
         ).migrate(),
       )
       _ <- Resource.eval(logger.info("Database migration completed"))
-      session <- PoolSession[IO](
+      poolSession <- PoolSession[IO](
         host = config.database.host.show,
         port = config.database.port.value,
         database = config.database.dbName,
@@ -44,6 +44,8 @@ object Main extends IOApp:
         maxPoolSize = config.database.maxPoolSize,
       ).poolSession
       _ <- Resource.eval(logger.info("Database connection established"))
+
+      session <- poolSession
 
       // Repositories to be used later in phase 2 with services
       challengesRepo = SkunkChallengeRepository[IO](session)

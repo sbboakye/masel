@@ -10,7 +10,7 @@ import com.sbboakye.masel.core.errors.AppError
 import com.sbboakye.masel.core.ports.SubmissionRepository
 import java.time.ZoneOffset
 
-class SubmissionService[F[_]: {MonadThrow, Sync}](repo: SubmissionRepository[F]):
+class SubmissionService[F[_]: Sync](repo: SubmissionRepository[F]):
   def listSubmissions(limit: Int, offset: Int): EitherT[F, AppError, List[Submission]] =
     repo
       .findAll(limit, offset)
