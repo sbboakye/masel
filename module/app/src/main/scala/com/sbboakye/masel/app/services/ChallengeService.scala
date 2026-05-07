@@ -1,6 +1,7 @@
 package com.sbboakye.masel.app.services
 
 import cats.*
+import cats.data.EitherT
 import cats.effect.{Clock, Sync}
 import cats.syntax.all.*
 import com.sbboakye.masel.app.requests.{CreateChallengeRequest, UpdateChallengeRequest}
@@ -11,25 +12,23 @@ import com.sbboakye.masel.core.ports.ChallengeRepository
 import java.time.ZoneOffset
 
 class ChallengeService[F[_]: {MonadThrow, Sync}](repo: ChallengeRepository[F]):
-  def listChallenges(limit: Int, offset: Int): F[Either[AppError, List[Challenge]]] =
+  def listChallenges(limit: Int, offset: Int): EitherT[F, AppError, List[Challenge]] =
     repo
       .findAll(limit, offset)
-      .map(Right(_))
-      .handleErrorWith(e => MonadThrow[F].pure(Left(AppError.InternalError(e.getMessage, Some(e)))))
+      .attemptT
+      .leftMap(e => AppError.InternalError(e.getMessage, Some(e)))
 
-  def getChallenge(id: ChallengeId): F[Either[AppError, Option[Challenge]]] =
+  def getChallenge(id: ChallengeId): EitherT[F, AppError, Challenge] =
     repo
       .findById(id)
-      .flatMap {
-        case Some(challenge) => MonadThrow[F].pure(Right(Some(challenge)))
-        case None => MonadThrow[F].pure(Left(AppError.NotFound("Challenge", id.value.toString)))
-      }
-      .handleErrorWith(e => MonadThrow[F].pure(Left(AppError.InternalError(e.getMessage, Some(e)))))
+      .attemptT
+      .leftMap(e => AppError.InternalError(e.getMessage, Some(e)))
+      .flatMap(EitherT.fromOption[F](_, AppError.NotFound("Challenge", id.value.toString)))
 
-  def createChallenge(request: CreateChallengeRequest): F[Either[AppError, Challenge]] =
+  def createChallenge(request: CreateChallengeRequest): EitherT[F, AppError, Challenge] =
     for {
-      id <- ChallengeId.generate[F]
-      now <- Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
+      id <- EitherT.liftF(ChallengeId.generate[F])
+      now <- EitherT.liftF(Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC)))
       challenge = Challenge(
         id = id,
         title = request.title,
@@ -44,41 +43,42 @@ class ChallengeService[F[_]: {MonadThrow, Sync}](repo: ChallengeRepository[F]):
       )
       created <- repo
         .create(challenge)
-        .map(Right(_))
-        .handleErrorWith(e => MonadThrow[F].pure(Left(AppError.InternalError(e.getMessage, Some(e)))))
+        .attemptT
+        .leftMap(e => AppError.InternalError(e.getMessage, Some(e)))
     } yield created
 
-  def updateChallenge(id: ChallengeId, request: UpdateChallengeRequest): F[Either[AppError, Option[Challenge]]] =
+  def updateChallenge(id: ChallengeId, request: UpdateChallengeRequest): EitherT[F, AppError, Challenge] =
     for {
-      now <- Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
-      maybeUpdated <- repo.findById(id).flatMap {
-        case None => MonadThrow[F].pure(Left(AppError.NotFound("Challenge", id.value.toString)))
-        case Some(existing) =>
+      now <- EitherT.liftF(Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC)))
+      maybeUpdated <- repo
+        .findById(id)
+        .attemptT
+        .leftMap(e => AppError.InternalError(e.getMessage, Some(e)))
+        .flatMap(EitherT.fromOption[F](_, AppError.NotFound("Challenge", id.value.toString)))
+        .flatMap { existing =>
           val updated = existing.copy(
             title = request.title.getOrElse(existing.title),
             instructions = request.instructions.getOrElse(existing.instructions),
             status = request.status.getOrElse(existing.status),
             expectedSolution = request.expectedSolution.getOrElse(existing.expectedSolution),
-            output = request.output,
+            output = request.output.orElse(existing.output),
             allottedTime = request.allottedTime.getOrElse(existing.allottedTime),
             difficulty = request.difficulty.getOrElse(existing.difficulty),
             updatedAt = now,
           )
           repo
             .update(updated)
-            .map {
-              case Some(_) => Right(Some(updated))
-              case None => Left(AppError.NotFound("Challenge", id.value.toString))
-            }
-            .handleErrorWith(e => MonadThrow[F].pure(Left(AppError.InternalError(e.getMessage, Some(e)))))
-      }
+            .attemptT
+            .leftMap(e => AppError.InternalError(e.getMessage, Some(e)))
+            .flatMap(EitherT.fromOption[F](_, AppError.NotFound("Challenge", id.value.toString)))
+        }
     } yield maybeUpdated
 
-  def deleteChallenge(id: ChallengeId): F[Either[AppError, Unit]] =
-    repo
-      .delete(id)
-      .map {
-        case true => Right(())
-        case false => Left(AppError.NotFound("Challenge", id.value.toString))
-      }
-      .handleErrorWith(e => MonadThrow[F].pure(Left(AppError.InternalError(e.getMessage, Some(e)))))
+  def deleteChallenge(id: ChallengeId): EitherT[F, AppError, Unit] =
+    for {
+      deleted <- repo
+        .delete(id)
+        .attemptT
+        .leftMap(e => AppError.InternalError(e.getMessage, Some(e)))
+      _ <- EitherT.cond(deleted, (), AppError.NotFound("Challenge", id.value.toString))
+    } yield ()
