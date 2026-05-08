@@ -2,7 +2,7 @@ package com.sbboakye.masel.app.services
 
 import cats.*
 import cats.data.EitherT
-import cats.effect.{Clock, Sync}
+import cats.effect.{Async, Clock, Sync}
 import cats.syntax.all.*
 import com.sbboakye.masel.app.requests.{CreateChallengeRequest, UpdateChallengeRequest}
 import com.sbboakye.masel.core.domain.ChallengeStatus.Draft
@@ -11,25 +11,26 @@ import com.sbboakye.masel.core.errors.AppError
 import com.sbboakye.masel.core.ports.{AppDb, Repos}
 import java.time.ZoneOffset
 
-class ChallengeService[F[_]: Sync](
+class ChallengeService[F[_]: Async](
     db: AppDb[F],
 ):
 
-  def listChallenges(limit: Int, offset: Int): EitherT[F, AppError, List[Challenge]] =
+  def listChallenges(limit: Int, offset: Int): F[List[Challenge]] =
     db.run(_.challenges.findAll(limit, offset))
-      .attemptT
-      .leftMap(e => AppError.InternalError(e.getMessage, Some(e)))
+      .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))
 
-  def getChallenge(id: ChallengeId): EitherT[F, AppError, Challenge] =
+  def getChallenge(id: ChallengeId): F[Option[Challenge]] =
     db.run(_.challenges.findById(id))
-      .attemptT
-      .leftMap(e => AppError.InternalError(e.getMessage, Some(e)))
-      .flatMap(EitherT.fromOption[F](_, AppError.NotFound("Challenge", id.value.toString)))
+      .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))
+      .flatTap {
+        case None => MonadError[F, Throwable].raiseError(AppError.NotFound("Challenge", id.value.toString))
+        case Some(challenge) => challenge.pure
+      }
 
-  def createChallenge(request: CreateChallengeRequest): EitherT[F, AppError, Challenge] =
+  def createChallenge(request: CreateChallengeRequest): F[Challenge] =
     for {
-      id <- EitherT.liftF(ChallengeId.generate[F])
-      now <- EitherT.liftF(Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC)))
+      id <- ChallengeId.generate[F]
+      now <- Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
       challenge = Challenge(
         id = id,
         title = request.title,
@@ -44,19 +45,21 @@ class ChallengeService[F[_]: Sync](
       )
       created <- db
         .run(_.challenges.create(challenge))
-        .attemptT
-        .leftMap(e => AppError.InternalError(e.getMessage, Some(e)))
+        .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))
+
     } yield created
 
-  def updateChallenge(id: ChallengeId, request: UpdateChallengeRequest): EitherT[F, AppError, Challenge] =
-    def helper(repos: Repos[F]): F[Either[AppError, Challenge]] =
-      (for {
+  def updateChallenge(id: ChallengeId, request: UpdateChallengeRequest): F[Option[Challenge]] =
+    def helper(repos: Repos[F]): F[Option[Challenge]] =
+      for {
         existing <- repos.challenges
           .findById(id)
-          .attemptT
-          .leftMap(e => AppError.InternalError(e.getMessage, Some(e)))
-          .flatMap(EitherT.fromOption[F](_, AppError.NotFound("Challenge", id.value.toString)))
-        now <- EitherT.liftF(Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC)))
+          .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))
+          .flatMap {
+            case None => MonadError[F, Throwable].raiseError(AppError.NotFound("Challenge", id.value.toString))
+            case Some(challenge) => challenge.pure
+          }
+        now <- Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
         copied = existing.copy(
           title = request.title.getOrElse(existing.title),
           instructions = request.instructions.getOrElse(existing.instructions),
@@ -69,18 +72,19 @@ class ChallengeService[F[_]: Sync](
         )
         updated <- repos.challenges
           .update(copied)
-          .attemptT
-          .leftMap(e => AppError.InternalError(e.getMessage, Some(e)))
-          .flatMap(EitherT.fromOption[F](_, AppError.NotFound("Challenge", id.value.toString)))
-      } yield updated).value
+          .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))
+          .flatTap {
+            case None => MonadError[F, Throwable].raiseError(AppError.NotFound("Challenge", id.value.toString))
+            case Some(challenge) => challenge.pure
+          }
+      } yield updated
 
-    EitherT(db.transact(helper))
+    db.transact(helper)
 
-  def deleteChallenge(id: ChallengeId): EitherT[F, AppError, Unit] =
+  def deleteChallenge(id: ChallengeId): F[Unit] =
     for {
       deleted <- db
-        .transact(_.challenges.delete(id))
-        .attemptT
-        .leftMap(e => AppError.InternalError(e.getMessage, Some(e)))
-      _ <- EitherT.cond(deleted, (), AppError.NotFound("Challenge", id.value.toString))
+        .run(_.challenges.delete(id))
+        .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))
+      _ <- MonadError[F, Throwable].raiseWhen(!deleted)(AppError.NotFound("Challenge", id.value.toString))
     } yield ()
