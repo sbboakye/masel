@@ -33,7 +33,7 @@ lazy val app = (project in file("module/app"))
   )
   .settings(
     name := "masel-app",
-    libraryDependencies ++= Dependencies.appDeps ++ Dependencies.testDeps,
+    libraryDependencies ++= Dependencies.appDeps ++ Dependencies.apiDeps ++ Dependencies.testDeps,
   )
 
 lazy val root = (project in file("."))

@@ -23,3 +23,4 @@ trait Repos[F[_]]:
 trait AppDb[F[_]]:
   def run[A](use: Repos[F] => F[A]): F[A]
   def transact[A](use: Repos[F] => F[A]): F[A]
+  def isReady: F[Boolean]

@@ -1,8 +1,6 @@
 package com.sbboakye.masel.core.domain
 
-import cats.effect.Sync
 import cats.effect.std.UUIDGen
-import io.circe.syntax.*
 import io.circe.{Decoder, Encoder}
 import java.util.UUID
 
