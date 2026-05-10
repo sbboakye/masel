@@ -1,7 +1,7 @@
 package com.sbboakye.masel.app.services
 
 import cats.*
-import cats.data.EitherT
+import cats.effect.std.UUIDGen
 import cats.effect.{Clock, Sync}
 import cats.syntax.all.*
 import com.sbboakye.masel.app.requests.{CreateSubmissionRequest, UpdateSubmissionRequest}
@@ -10,7 +10,7 @@ import com.sbboakye.masel.core.errors.AppError
 import com.sbboakye.masel.core.ports.{AppDb, Repos}
 import java.time.ZoneOffset
 
-class SubmissionService[F[_]: Sync](db: AppDb[F]):
+class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen}](db: AppDb[F]):
   def listSubmissions(limit: Int, offset: Int): F[List[Submission]] =
     db.run(_.submissions.findAll(limit, offset))
       .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))

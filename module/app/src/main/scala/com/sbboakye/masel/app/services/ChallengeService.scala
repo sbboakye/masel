@@ -1,8 +1,8 @@
 package com.sbboakye.masel.app.services
 
 import cats.*
-import cats.data.EitherT
-import cats.effect.{Async, Clock, Sync}
+import cats.effect.std.UUIDGen
+import cats.effect.{Async, Clock}
 import cats.syntax.all.*
 import com.sbboakye.masel.app.requests.{CreateChallengeRequest, UpdateChallengeRequest}
 import com.sbboakye.masel.core.domain.ChallengeStatus.Draft
@@ -11,7 +11,7 @@ import com.sbboakye.masel.core.errors.AppError
 import com.sbboakye.masel.core.ports.{AppDb, Repos}
 import java.time.ZoneOffset
 
-class ChallengeService[F[_]: Async](
+class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen}](
     db: AppDb[F],
 ):
 
