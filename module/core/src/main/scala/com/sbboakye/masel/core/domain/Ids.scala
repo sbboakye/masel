@@ -15,14 +15,14 @@ inline def uuidDecoder[A](inline wrap: UUID => A): Decoder[A] =
 
 object ChallengeId:
   def apply(uuid: UUID): ChallengeId = uuid
-  def generate[F[_]: UUIDGen]: F[ChallengeId] = UUIDGen.randomUUID //    Sync[F].delay(UUID.randomUUID())
+  def generate[F[_]: UUIDGen]: F[ChallengeId] = UUIDGen.randomUUID
   extension (id: ChallengeId) def value: UUID = id
-  given ChallengeIdEncoder: Encoder[ChallengeId] = uuidEncoder(_.value)
-  given ChallengeIdDecoder: Decoder[ChallengeId] = uuidDecoder(ChallengeId.apply)
+  given Encoder[ChallengeId] = uuidEncoder(_.value)
+  given Decoder[ChallengeId] = uuidDecoder(ChallengeId.apply)
 
 object SubmissionId:
   def apply(uuid: UUID): SubmissionId = uuid
-  def generate[F[_]: UUIDGen]: F[SubmissionId] = UUIDGen.randomUUID // Sync[F].delay(UUID.randomUUID())
+  def generate[F[_]: UUIDGen]: F[SubmissionId] = UUIDGen.randomUUID
   extension (id: SubmissionId) def value: UUID = id
-  given SubmissionIdEncoder: Encoder[SubmissionId] = uuidEncoder(_.value)
-  given SubmissionIdDecoder: Decoder[SubmissionId] = uuidDecoder(SubmissionId.apply)
+  given Encoder[SubmissionId] = uuidEncoder(_.value)
+  given Decoder[SubmissionId] = uuidDecoder(SubmissionId.apply)

@@ -1,12 +1,8 @@
 package com.sbboakye.masel.app.requests
 
-import com.sbboakye.masel.core.domain.{ChallengeDifficulty, ChallengeStatus, NonEmptyString, PositiveInt}
+import com.sbboakye.masel.core.domain.{ChallengeDifficulty, ChallengeStatus, NonEmptyString, PositiveInt, given}
 import io.circe.generic.semiauto.*
 import io.circe.{Decoder, Encoder}
-import io.github.iltotore.iron.*
-import io.github.iltotore.iron.circe.given
-import io.github.iltotore.iron.constraint.*
-import io.github.iltotore.iron.constraint.all.*
 
 case class CreateChallengeRequest(
     title: NonEmptyString,

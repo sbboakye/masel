@@ -19,10 +19,10 @@ class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen}](
     db.run(_.challenges.findAll(limit, offset))
       .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))
 
-  def getChallenge(id: ChallengeId): F[Option[Challenge]] =
+  def getChallenge(id: ChallengeId): F[Challenge] =
     db.run(_.challenges.findById(id))
       .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))
-      .flatTap {
+      .flatMap {
         case None => MonadError[F, Throwable].raiseError(AppError.NotFound("Challenge", id.value.toString))
         case Some(challenge) => challenge.pure
       }
@@ -49,8 +49,8 @@ class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen}](
 
     } yield created
 
-  def updateChallenge(id: ChallengeId, request: UpdateChallengeRequest): F[Option[Challenge]] =
-    def helper(repos: Repos[F]): F[Option[Challenge]] =
+  def updateChallenge(id: ChallengeId, request: UpdateChallengeRequest): F[Challenge] =
+    def helper(repos: Repos[F]): F[Challenge] =
       for {
         existing <- repos.challenges
           .findById(id)
@@ -73,7 +73,7 @@ class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen}](
         updated <- repos.challenges
           .update(copied)
           .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))
-          .flatTap {
+          .flatMap {
             case None => MonadError[F, Throwable].raiseError(AppError.NotFound("Challenge", id.value.toString))
             case Some(challenge) => challenge.pure
           }

@@ -1,12 +1,8 @@
 package com.sbboakye.masel.app.requests
 
-import com.sbboakye.masel.core.domain.{ChallengeId, NonEmptyString, PositiveInt, Score}
+import com.sbboakye.masel.core.domain.{ChallengeId, NonEmptyString, PositiveInt, Score, given}
 import io.circe.generic.semiauto.*
 import io.circe.{Decoder, Encoder}
-import io.github.iltotore.iron.*
-import io.github.iltotore.iron.circe.given
-import io.github.iltotore.iron.constraint.*
-import io.github.iltotore.iron.constraint.all.*
 
 case class CreateSubmissionRequest(
     challengeId: ChallengeId,
