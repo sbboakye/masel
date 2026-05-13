@@ -15,10 +15,10 @@ class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen}](db: AppDb[F]):
     db.run(_.submissions.findAll(limit, offset))
       .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))
 
-  def getSubmission(id: SubmissionId): F[Option[Submission]] =
+  def getSubmission(id: SubmissionId): F[Submission] =
     db.run(_.submissions.findById(id))
       .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))
-      .flatTap {
+      .flatMap {
         case None => MonadError[F, Throwable].raiseError(AppError.NotFound("Submission", id.value.toString))
         case Some(submission) => submission.pure
       }
@@ -41,8 +41,8 @@ class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen}](db: AppDb[F]):
         .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))
     } yield created
 
-  def updateSubmission(id: SubmissionId, request: UpdateSubmissionRequest): F[Option[Submission]] =
-    def helper(repos: Repos[F]): F[Option[Submission]] =
+  def updateSubmission(id: SubmissionId, request: UpdateSubmissionRequest): F[Submission] =
+    def helper(repos: Repos[F]): F[Submission] =
       for {
         existing <- repos.submissions
           .findById(id)
@@ -61,7 +61,7 @@ class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen}](db: AppDb[F]):
         updated <- repos.submissions
           .update(copied)
           .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))
-          .flatTap {
+          .flatMap {
             case None => MonadError[F, Throwable].raiseError(AppError.NotFound("Submission", id.value.toString))
             case Some(challenge) => challenge.pure
           }
@@ -74,5 +74,5 @@ class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen}](db: AppDb[F]):
       deleted <- db
         .run(_.submissions.delete(id))
         .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))
-      _ <- MonadError[F, Throwable].raiseWhen(!deleted)(AppError.NotFound("Challenge", id.value.toString))
+      _ <- MonadError[F, Throwable].raiseWhen(!deleted)(AppError.NotFound("Submission", id.value.toString))
     } yield ()

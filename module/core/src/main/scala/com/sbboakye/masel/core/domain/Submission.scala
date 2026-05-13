@@ -2,9 +2,6 @@ package com.sbboakye.masel.core.domain
 
 import io.circe.generic.semiauto.*
 import io.circe.{Decoder, Encoder}
-import io.github.iltotore.iron.circe.given
-import io.github.iltotore.iron.constraint.all.*
-import io.github.iltotore.iron.constraint.numeric.*
 import java.time.OffsetDateTime
 
 case class Submission(

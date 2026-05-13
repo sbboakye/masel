@@ -2,68 +2,53 @@ package com.sbboakye.masel.app.routes
 
 import cats.effect.Async
 import cats.syntax.all.*
-import com.sbboakye.masel.app.endpoints.{BaseEndpoint, SubmissionEndpoints}
+import com.sbboakye.masel.app.requests.{CreateSubmissionRequest, UpdateSubmissionRequest}
 import com.sbboakye.masel.app.services.SubmissionService
 import com.sbboakye.masel.core.domain.SubmissionId
-import com.sbboakye.masel.core.errors.AppError
+import java.util.UUID
 import org.http4s.HttpRoutes
-import sttp.tapir.server.http4s.Http4sServerInterpreter
+import org.http4s.circe.CirceEntityCodec.*
+import org.http4s.dsl.Http4sDsl
 
 class SubmissionRoutes[F[_]: Async](service: SubmissionService[F]):
-  import BaseEndpoint.mapError
 
-  private val listSubmissionsRoute =
-    SubmissionEndpoints.listSubmissions.serverLogic { case (limit, offset) =>
+  private val dsl = new Http4sDsl[F] {}
+  import dsl.*
+  import ErrorHandling.recoverAppErrors
+
+  private object LimitParam extends OptionalQueryParamDecoderMatcher[Int]("limit")
+  private object OffsetParam extends OptionalQueryParamDecoderMatcher[Int]("offset")
+
+  val routes: HttpRoutes[F] = HttpRoutes.of[F] {
+    case GET -> Root / "api" / "v1" / "submissions" :? LimitParam(limit) +& OffsetParam(offset) =>
       service
-        .listSubmissions(limit, offset)
-        .map(Right(_))
-        .handleError(e => Left(mapError(e)))
-    }
+        .listSubmissions(limit.getOrElse(10), offset.getOrElse(0))
+        .flatMap(Ok(_))
+        .recoverAppErrors(dsl)
 
-  private val getSubmissionRoute =
-    SubmissionEndpoints.getSubmission.serverLogic(id =>
+    case GET -> Root / "api" / "v1" / "submissions" / UUIDVar(id) =>
       service
         .getSubmission(SubmissionId(id))
-        .map {
-          case Some(submission) => Right(submission)
-          case None => Left(mapError(AppError.NotFound("Submission", id.toString)))
-        }
-        .handleError(e => Left(mapError(e))),
-    )
+        .flatMap(Ok(_))
+        .recoverAppErrors(dsl)
 
-  private val createSubmissionRoute =
-    SubmissionEndpoints.createSubmission.serverLogic(req =>
-      service
-        .createSubmission(req)
-        .map(Right(_))
-        .handleError(e => Left(mapError(e))),
-    )
+    case req @ POST -> Root / "api" / "v1" / "submissions" =>
+      req
+        .as[CreateSubmissionRequest]
+        .flatMap(service.createSubmission)
+        .flatMap(Created(_))
+        .recoverAppErrors(dsl)
 
-  private val updateSubmissionRoute =
-    SubmissionEndpoints.updateSubmission.serverLogic((id, req) =>
-      service
-        .updateSubmission(SubmissionId(id), req)
-        .map {
-          case Some(submission) => Right(submission)
-          case None => Left(mapError(AppError.NotFound("Submission", id.toString)))
-        }
-        .handleError(e => Left(mapError(e))),
-    )
+    case req @ PUT -> Root / "api" / "v1" / "submissions" / UUIDVar(id) =>
+      req
+        .as[UpdateSubmissionRequest]
+        .flatMap(service.updateSubmission(SubmissionId(id), _))
+        .flatMap(Ok(_))
+        .recoverAppErrors(dsl)
 
-  private val deleteSubmissionRoute =
-    SubmissionEndpoints.deleteSubmission.serverLogic(id =>
+    case DELETE -> Root / "api" / "v1" / "submissions" / UUIDVar(id) =>
       service
         .deleteSubmission(SubmissionId(id))
-        .map(Right(_))
-        .handleError(e => Left(mapError(e))),
-    )
-
-  val routes: HttpRoutes[F] = Http4sServerInterpreter[F]().toRoutes(
-    List(
-      listSubmissionsRoute,
-      getSubmissionRoute,
-      createSubmissionRoute,
-      updateSubmissionRoute,
-      deleteSubmissionRoute,
-    ),
-  )
+        .flatMap(_ => NoContent())
+        .recoverAppErrors(dsl)
+  }

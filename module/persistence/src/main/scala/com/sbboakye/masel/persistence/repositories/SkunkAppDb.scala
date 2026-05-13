@@ -20,5 +20,5 @@ object SkunkAppDb:
       pool.use(session => session.transaction.use(_ => use(repos(session))))
 
     override def isReady: F[Boolean] =
-      pool.use(session => session.execute(sql"SELECT 1".command).void).attempt.map(_.isRight)
+      pool.use(session => session.execute(sql"SELECT 1".query(int4)).void).attempt.map(_.isRight)
   }

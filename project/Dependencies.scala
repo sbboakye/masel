@@ -11,7 +11,6 @@ object Dependencies {
 
     // Http API
     val http4s = "0.23.34"
-    val tapir = "1.13.18"
 
     // Database
     val skunk = "1.0.0"
@@ -52,12 +51,6 @@ object Dependencies {
   val http4sEmberClient = "org.http4s" %% "http4s-ember-client" % Versions.http4s
   val http4sCirce = "org.http4s" %% "http4s-circe" % Versions.http4s
   val http4sDsl = "org.http4s" %% "http4s-dsl" % Versions.http4s
-
-  val tapirCore = "com.softwaremill.sttp.tapir" %% "tapir-core" % Versions.tapir
-  val tapirHttp4s = "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % Versions.tapir
-  val tapirCirce = "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % Versions.tapir
-  val tapirSwagger = "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % Versions.tapir
-  val tapirIron = "com.softwaremill.sttp.tapir" %% "tapir-iron" % Versions.tapir
 
   // Database
   val skunkCore = "org.tpolecat" %% "skunk-core" % Versions.skunk
@@ -104,9 +97,6 @@ object Dependencies {
       ironCats,
       skunkCore,
       skunkCirce,
-      tapirCore,
-      tapirCirce,
-      tapirIron,
     )
 
   val persistenceDeps: Seq[ModuleID] =
@@ -118,11 +108,6 @@ object Dependencies {
       http4sEmberClient,
       http4sCirce,
       http4sDsl,
-      tapirCore,
-      tapirCirce,
-      tapirHttp4s,
-      tapirSwagger,
-      tapirIron,
     )
 
   val engineDeps: Seq[ModuleID] = Seq(fs2Core, catsEffect, log4catsSlf4j)

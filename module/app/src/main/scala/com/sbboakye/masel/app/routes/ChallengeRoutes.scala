@@ -2,68 +2,53 @@ package com.sbboakye.masel.app.routes
 
 import cats.effect.Async
 import cats.syntax.all.*
-import com.sbboakye.masel.app.endpoints.{BaseEndpoint, ChallengeEndpoints}
+import com.sbboakye.masel.app.requests.{CreateChallengeRequest, UpdateChallengeRequest}
 import com.sbboakye.masel.app.services.ChallengeService
 import com.sbboakye.masel.core.domain.ChallengeId
-import com.sbboakye.masel.core.errors.AppError
+import java.util.UUID
 import org.http4s.HttpRoutes
-import sttp.tapir.server.http4s.Http4sServerInterpreter
+import org.http4s.circe.CirceEntityCodec.*
+import org.http4s.dsl.Http4sDsl
 
 class ChallengeRoutes[F[_]: Async](service: ChallengeService[F]):
-  import BaseEndpoint.mapError
 
-  private val listChallengesRoute =
-    ChallengeEndpoints.listChallenges.serverLogic { case (limit, offset) =>
+  private val dsl = new Http4sDsl[F] {}
+  import dsl.*
+  import ErrorHandling.recoverAppErrors
+
+  private object LimitParam extends OptionalQueryParamDecoderMatcher[Int]("limit")
+  private object OffsetParam extends OptionalQueryParamDecoderMatcher[Int]("offset")
+
+  val routes: HttpRoutes[F] = HttpRoutes.of[F] {
+    case GET -> Root / "api" / "v1" / "challenges" :? LimitParam(limit) +& OffsetParam(offset) =>
       service
-        .listChallenges(limit, offset)
-        .map(Right(_))
-        .handleError(e => Left(mapError(e)))
-    }
+        .listChallenges(limit.getOrElse(10), offset.getOrElse(0))
+        .flatMap(Ok(_))
+        .recoverAppErrors(dsl)
 
-  private val getChallengeRoute =
-    ChallengeEndpoints.getChallenge.serverLogic(id =>
+    case GET -> Root / "api" / "v1" / "challenges" / UUIDVar(id) =>
       service
         .getChallenge(ChallengeId(id))
-        .map {
-          case Some(challenge) => Right(challenge)
-          case None => Left(mapError(AppError.NotFound("Challenge", id.toString)))
-        }
-        .handleError(e => Left(mapError(e))),
-    )
+        .flatMap(Ok(_))
+        .recoverAppErrors(dsl)
 
-  private val createChallengeRoute =
-    ChallengeEndpoints.createChallenge.serverLogic(req =>
-      service
-        .createChallenge(req)
-        .map(Right(_))
-        .handleError(e => Left(mapError(e))),
-    )
+    case req @ POST -> Root / "api" / "v1" / "challenges" =>
+      req
+        .as[CreateChallengeRequest]
+        .flatMap(service.createChallenge)
+        .flatMap(Created(_))
+        .recoverAppErrors(dsl)
 
-  private val updateChallengeRoute =
-    ChallengeEndpoints.updateChallenge.serverLogic((id, req) =>
-      service
-        .updateChallenge(ChallengeId(id), req)
-        .map {
-          case Some(challenge) => Right(challenge)
-          case None => Left(mapError(AppError.NotFound("Challenge", id.toString)))
-        }
-        .handleError(e => Left(mapError(e))),
-    )
+    case req @ PUT -> Root / "api" / "v1" / "challenges" / UUIDVar(id) =>
+      req
+        .as[UpdateChallengeRequest]
+        .flatMap(service.updateChallenge(ChallengeId(id), _))
+        .flatMap(Ok(_))
+        .recoverAppErrors(dsl)
 
-  private val deleteChallengeRoute =
-    ChallengeEndpoints.deleteChallenge.serverLogic(id =>
+    case DELETE -> Root / "api" / "v1" / "challenges" / UUIDVar(id) =>
       service
         .deleteChallenge(ChallengeId(id))
-        .map(Right(_))
-        .handleError(e => Left(mapError(e))),
-    )
-
-  val routes: HttpRoutes[F] = Http4sServerInterpreter[F]().toRoutes(
-    List(
-      listChallengesRoute,
-      getChallengeRoute,
-      createChallengeRoute,
-      updateChallengeRoute,
-      deleteChallengeRoute,
-    ),
-  )
+        .flatMap(_ => NoContent())
+        .recoverAppErrors(dsl)
+  }
