@@ -76,11 +76,3 @@ class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen, LoggerFactory}](db: A
         _ <- AppError.NotFound("Submission", id.value.toString).raiseError[F, Unit].whenA(!deleted)
       } yield (),
     )
-//    for {
-//      deleted <-
-//        serviceHandler(
-//          db
-//            .withSession(_.submissions.delete(id)),
-//        )
-//      _ <- AppError.NotFound("Submission", id.value.toString).raiseError[F, Unit].whenA(!deleted)
-//    } yield ()
