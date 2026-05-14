@@ -28,5 +28,4 @@ trait AppDb[F[_]: MonadThrow]:
   def withSession[A](use: Repos[F] => F[A]): F[A]
   def withTransaction[A](use: Repos[F] => F[A]): F[A]
   def isReady: F[Boolean]
-  def dbCall[A](fa: F[A]): F[A] =
-    fa.adaptError { case e => AppError.DatabaseError }
+  def dbCall[A](fa: F[A]): F[A]
