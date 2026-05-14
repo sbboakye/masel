@@ -22,33 +22,31 @@ class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen, LoggerFactory}](db: A
     )
 
   def createSubmission(request: CreateSubmissionRequest): F[Submission] =
-    for {
-      id <- SubmissionId.generate[F]
-      now <- Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
-      challenge <-
-        serviceHandler(
-          db
-            .withSession(
-              _.challenges
-                .findById(request.challengeId)
-                .orNotFound("Challenge", request.challengeId.value.toString),
-            ),
+    serviceHandler(db.withTransaction { repos =>
+      for {
+        id <- SubmissionId.generate[F]
+        now <- Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
+        challenge <-
+          serviceHandler(
+            db
+              .withSession(
+                _.challenges
+                  .findById(request.challengeId)
+                  .orNotFound("Challenge", request.challengeId.value.toString),
+              ),
+          )
+        submission = Submission(
+          id = id,
+          challengeId = challenge.id,
+          candidateSolution = request.candidateSolution,
+          output = None,
+          score = None,
+          createdAt = now,
+          updatedAt = now,
         )
-      submission = Submission(
-        id = id,
-        challengeId = challenge.id,
-        candidateSolution = request.candidateSolution,
-        output = None,
-        score = None,
-        createdAt = now,
-        updatedAt = now,
-      )
-      created <-
-        serviceHandler(
-          db
-            .withSession(_.submissions.create(submission)),
-        )
-    } yield created
+        created <- repos.submissions.create(submission)
+      } yield created
+    })
 
   def updateSubmission(id: SubmissionId, request: UpdateSubmissionRequest): F[Submission] =
     def helper(repos: Repos[F]): F[Submission] =
@@ -71,11 +69,18 @@ class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen, LoggerFactory}](db: A
     serviceHandler(db.withTransaction(helper))
 
   def deleteSubmission(id: SubmissionId): F[Unit] =
-    for {
-      deleted <-
-        serviceHandler(
-          db
-            .withSession(_.submissions.delete(id)),
-        )
-      _ <- AppError.NotFound("Submission", id.value.toString).raiseError[F, Unit].whenA(!deleted)
-    } yield ()
+    serviceHandler(
+      for {
+        deleted <- db
+          .withSession(_.submissions.delete(id))
+        _ <- AppError.NotFound("Submission", id.value.toString).raiseError[F, Unit].whenA(!deleted)
+      } yield (),
+    )
+//    for {
+//      deleted <-
+//        serviceHandler(
+//          db
+//            .withSession(_.submissions.delete(id)),
+//        )
+//      _ <- AppError.NotFound("Submission", id.value.toString).raiseError[F, Unit].whenA(!deleted)
+//    } yield ()

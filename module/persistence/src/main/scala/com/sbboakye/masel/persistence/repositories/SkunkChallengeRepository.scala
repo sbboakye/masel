@@ -10,7 +10,7 @@ import skunk.Session
 
 class SkunkChallengeRepository[F[_]: {Concurrent, LoggerFactory}](session: Session[F])
     extends ChallengeRepository[F]
-    with Helpers:
+    with Helpers[F]:
   override def findAll(limit: Int, offset: Int): F[List[Challenge]] =
     repoHandler(
       session.prepare(ChallengeQueries.findAll).flatMap(ps => ps.stream((limit, offset), limit).compile.toList),
