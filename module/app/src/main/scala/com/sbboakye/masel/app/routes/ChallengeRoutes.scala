@@ -5,7 +5,6 @@ import cats.syntax.all.*
 import com.sbboakye.masel.app.requests.{CreateChallengeRequest, UpdateChallengeRequest}
 import com.sbboakye.masel.app.services.ChallengeService
 import com.sbboakye.masel.core.domain.ChallengeId
-import java.util.UUID
 import org.http4s.HttpRoutes
 import org.http4s.circe.CirceEntityCodec.*
 import org.http4s.dsl.Http4sDsl
@@ -13,8 +12,8 @@ import org.http4s.dsl.Http4sDsl
 class ChallengeRoutes[F[_]: Async](service: ChallengeService[F]):
 
   private val dsl = new Http4sDsl[F] {}
-  import dsl.*
   import ErrorHandling.recoverAppErrors
+  import dsl.*
 
   private object LimitParam extends OptionalQueryParamDecoderMatcher[Int]("limit")
   private object OffsetParam extends OptionalQueryParamDecoderMatcher[Int]("offset")
