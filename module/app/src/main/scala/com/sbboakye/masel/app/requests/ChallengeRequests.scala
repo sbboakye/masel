@@ -22,6 +22,7 @@ case class UpdateChallengeRequest(
     instructions: Option[NonEmptyString],
     status: Option[ChallengeStatus],
     expectedSolution: Option[NonEmptyString],
+    output: Option[io.circe.Json],
     allottedTime: Option[PositiveInt],
     difficulty: Option[ChallengeDifficulty],
 )

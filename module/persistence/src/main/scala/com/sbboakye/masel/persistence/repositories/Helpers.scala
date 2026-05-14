@@ -10,12 +10,7 @@ trait Helpers:
   private def deletedRow[F[_]: MonadThrow](c: Completion): F[Int] = c match {
     case Completion.Delete(n) => n.pure[F]
     case other =>
-      MonadThrow[F].raiseError(
-        InternalError(
-          message = s"Expected Delete Completion, got: $other",
-          cause = None,
-        ),
-      )
+      InternalError.raiseError[F, Int]
   }
 
   def wasDeleted[F[_]: MonadThrow](c: Completion): F[Boolean] = deletedRow(c).map(_ > 0)

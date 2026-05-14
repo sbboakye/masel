@@ -24,8 +24,8 @@ object ErrorHandling:
         NotFound(ErrorResponse(s"$entity not found: $id"))
       case AppError.ValidationFailed(errors) =>
         BadRequest(ErrorResponse(s"Validation failed: ${errors.mkString(", ")}"))
-      case AppError.InternalError(message, _) =>
-        InternalServerError(ErrorResponse(message))
+      case AppError.InternalError =>
+        InternalServerError(ErrorResponse("Server error"))
       case other =>
         InternalServerError(ErrorResponse(Option(other.getMessage).getOrElse("Internal server error")))
 

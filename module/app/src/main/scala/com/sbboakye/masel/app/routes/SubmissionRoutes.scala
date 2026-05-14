@@ -2,7 +2,7 @@ package com.sbboakye.masel.app.routes
 
 import cats.effect.Async
 import cats.syntax.all.*
-import com.sbboakye.masel.app.requests.CreateSubmissionRequest
+import com.sbboakye.masel.app.requests.{CreateSubmissionRequest, UpdateSubmissionRequest}
 import com.sbboakye.masel.app.services.SubmissionService
 import com.sbboakye.masel.core.domain.SubmissionId
 import org.http4s.HttpRoutes
@@ -36,6 +36,13 @@ class SubmissionRoutes[F[_]: Async](service: SubmissionService[F]):
         .as[CreateSubmissionRequest]
         .flatMap(service.createSubmission)
         .flatMap(Created(_))
+        .recoverAppErrors(dsl)
+
+    case req @ PUT -> basePath / "submissions" / UUIDVar(id) =>
+      req
+        .as[UpdateSubmissionRequest]
+        .flatMap(service.updateSubmission(SubmissionId(id), _))
+        .flatMap(Ok(_))
         .recoverAppErrors(dsl)
 
     case DELETE -> basePath / "submissions" / UUIDVar(id) =>

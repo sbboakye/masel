@@ -1,6 +1,10 @@
 package com.sbboakye.masel.core.ports
 
+import cats.MonadThrow
+import cats.effect.syntax.all.*
+import cats.syntax.all.*
 import com.sbboakye.masel.core.domain.{Challenge, ChallengeId, Submission, SubmissionId}
+import com.sbboakye.masel.core.errors.AppError
 
 trait ChallengeRepository[F[_]]:
   def findAll(limit: Int, offset: Int): F[List[Challenge]]
@@ -20,7 +24,9 @@ trait Repos[F[_]]:
   val challenges: ChallengeRepository[F]
   val submissions: SubmissionRepository[F]
 
-trait AppDb[F[_]]:
+trait AppDb[F[_]: MonadThrow]:
   def withSession[A](use: Repos[F] => F[A]): F[A]
   def withTransaction[A](use: Repos[F] => F[A]): F[A]
   def isReady: F[Boolean]
+  def dbCall[A](fa: F[A]): F[A] =
+    fa.adaptError { case e => AppError.DatabaseError }
