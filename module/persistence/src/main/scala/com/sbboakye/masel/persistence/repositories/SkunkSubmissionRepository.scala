@@ -5,9 +5,12 @@ import cats.syntax.all.*
 import com.sbboakye.masel.core.domain.{Submission, SubmissionId}
 import com.sbboakye.masel.core.ports.SubmissionRepository
 import com.sbboakye.masel.persistence.queries.SubmissionQueries
+import org.typelevel.log4cats.LoggerFactory
 import skunk.Session
 
-class SkunkSubmissionRepository[F[_]: Concurrent](session: Session[F]) extends SubmissionRepository[F] with Helpers:
+class SkunkSubmissionRepository[F[_]: {Concurrent, LoggerFactory}](session: Session[F])
+    extends SubmissionRepository[F]
+    with Helpers:
   override def findAll(limit: Int, offset: Int): F[List[Submission]] =
     repoHandler(
       session.prepare(SubmissionQueries.findAll).flatMap(ps => ps.stream((limit, offset), limit).compile.toList),

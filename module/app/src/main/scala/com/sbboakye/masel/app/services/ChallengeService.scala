@@ -10,7 +10,7 @@ import com.sbboakye.masel.core.domain.{Challenge, ChallengeId}
 import com.sbboakye.masel.core.errors.AppError
 import com.sbboakye.masel.core.ports.{AppDb, Repos}
 import java.time.ZoneOffset
-import org.typelevel.log4cats.{LoggerFactory, SelfAwareStructuredLogger}
+import org.typelevel.log4cats.LoggerFactory
 
 class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen, LoggerFactory}](
     db: AppDb[F],
@@ -22,10 +22,7 @@ class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen, LoggerFactory}](
   def getChallenge(id: ChallengeId): F[Challenge] =
     serviceHandler(
       db.withSession(_.challenges.findById(id))
-        .flatMap {
-          case None => MonadError[F, Throwable].raiseError(AppError.NotFound("Challenge", id.value.toString))
-          case Some(challenge) => challenge.pure
-        },
+        .orNotFound("Challenge", id.value.toString),
     )
 
   def createChallenge(request: CreateChallengeRequest): F[Challenge] =
@@ -57,10 +54,7 @@ class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen, LoggerFactory}](
       for {
         existing <- repos.challenges
           .findById(id)
-          .flatMap {
-            case None => MonadError[F, Throwable].raiseError(AppError.NotFound("Challenge", id.value.toString))
-            case Some(challenge) => challenge.pure
-          }
+          .orNotFound("Challenge", id.value.toString)
         now <- Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
         copied = existing.copy(
           title = request.title.getOrElse(existing.title),
@@ -74,10 +68,7 @@ class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen, LoggerFactory}](
         )
         updated <- repos.challenges
           .update(copied)
-          .flatMap {
-            case None => MonadError[F, Throwable].raiseError(AppError.NotFound("Challenge", id.value.toString))
-            case Some(challenge) => challenge.pure
-          }
+          .orNotFound("Challenge", id.value.toString)
       } yield updated
 
     serviceHandler(db.withTransaction(helper))
@@ -89,5 +80,5 @@ class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen, LoggerFactory}](
           db
             .withSession(_.challenges.delete(id)),
         )
-      _ <- MonadError[F, Throwable].raiseWhen(!deleted)(AppError.NotFound("Challenge", id.value.toString))
+      _ <- AppError.NotFound("Challenge", id.value.toString).raiseError[F, Unit].whenA(!deleted)
     } yield ()

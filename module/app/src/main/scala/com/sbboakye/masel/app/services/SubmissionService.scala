@@ -9,34 +9,31 @@ import com.sbboakye.masel.core.domain.{Submission, SubmissionId}
 import com.sbboakye.masel.core.errors.AppError
 import com.sbboakye.masel.core.ports.{AppDb, Repos}
 import java.time.ZoneOffset
+import org.typelevel.log4cats.LoggerFactory
 
-class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen}](db: AppDb[F]):
+class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen, LoggerFactory}](db: AppDb[F]) extends Helpers:
   def listSubmissions(limit: Int, offset: Int): F[List[Submission]] =
-    db.withSession(_.submissions.findAll(limit, offset))
+    serviceHandler(db.withSession(_.submissions.findAll(limit, offset)))
 
   def getSubmission(id: SubmissionId): F[Submission] =
-    db.withSession(_.submissions.findById(id))
-      .flatMap {
-        case None => MonadError[F, Throwable].raiseError(AppError.NotFound("Submission", id.value.toString))
-        case Some(submission) => submission.pure
-      }
+    serviceHandler(
+      db.withSession(_.submissions.findById(id))
+        .orNotFound("Submission", id.value.toString),
+    )
 
   def createSubmission(request: CreateSubmissionRequest): F[Submission] =
     for {
       id <- SubmissionId.generate[F]
       now <- Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
       challenge <-
-        db
-          .withSession(
-            _.challenges
-              .findById(request.challengeId)
-              .flatMap {
-                case None =>
-                  MonadError[F, Throwable]
-                    .raiseError(AppError.NotFound("Challenge", request.challengeId.value.toString))
-                case Some(challenge) => challenge.pure
-              },
-          )
+        serviceHandler(
+          db
+            .withSession(
+              _.challenges
+                .findById(request.challengeId)
+                .orNotFound("Challenge", request.challengeId.value.toString),
+            ),
+        )
       submission = Submission(
         id = id,
         challengeId = challenge.id,
@@ -47,8 +44,10 @@ class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen}](db: AppDb[F]):
         updatedAt = now,
       )
       created <-
-        db
-          .withSession(_.submissions.create(submission))
+        serviceHandler(
+          db
+            .withSession(_.submissions.create(submission)),
+        )
     } yield created
 
   def updateSubmission(id: SubmissionId, request: UpdateSubmissionRequest): F[Submission] =
@@ -56,10 +55,7 @@ class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen}](db: AppDb[F]):
       for {
         existing <- repos.submissions
           .findById(id)
-          .flatMap {
-            case None => MonadError[F, Throwable].raiseError(AppError.NotFound("Submission", id.value.toString))
-            case Some(challenge) => challenge.pure
-          }
+          .orNotFound("Submission", id.value.toString)
         now <- Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
         copied = existing.copy(
           candidateSolution = request.candidateSolution.getOrElse(existing.candidateSolution),
@@ -69,18 +65,17 @@ class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen}](db: AppDb[F]):
         )
         updated <- repos.submissions
           .update(copied)
-          .flatMap {
-            case None => MonadError[F, Throwable].raiseError(AppError.NotFound("Submission", id.value.toString))
-            case Some(challenge) => challenge.pure
-          }
+          .orNotFound("Submission", id.value.toString)
       } yield updated
 
-    db.withTransaction(helper)
+    serviceHandler(db.withTransaction(helper))
 
   def deleteSubmission(id: SubmissionId): F[Unit] =
     for {
       deleted <-
-        db
-          .withSession(_.submissions.delete(id))
-      _ <- MonadError[F, Throwable].raiseWhen(!deleted)(AppError.NotFound("Submission", id.value.toString))
+        serviceHandler(
+          db
+            .withSession(_.submissions.delete(id)),
+        )
+      _ <- AppError.NotFound("Submission", id.value.toString).raiseError[F, Unit].whenA(!deleted)
     } yield ()
