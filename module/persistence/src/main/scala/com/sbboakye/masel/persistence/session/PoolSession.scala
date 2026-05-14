@@ -7,15 +7,6 @@ import org.typelevel.otel4s.trace.Tracer.Implicits.noop
 import skunk.Session.Credentials
 import skunk.{Session, TypingStrategy}
 
-case class PoolSession[F[_]: {Async, Console}](
-    host: String,
-    port: Int,
-    database: String,
-    username: String,
-    password: String,
-    maxPoolSize: Int,
-)
-
 object PoolSession:
   def make[F[_]: {Async, Console}](
       host: String,

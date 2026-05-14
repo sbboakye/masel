@@ -17,10 +17,10 @@ trait SubmissionRepository[F[_]]:
   def delete(id: SubmissionId): F[Boolean]
 
 trait Repos[F[_]]:
-  def challenges: ChallengeRepository[F]
-  def submissions: SubmissionRepository[F]
+  val challenges: ChallengeRepository[F]
+  val submissions: SubmissionRepository[F]
 
 trait AppDb[F[_]]:
-  def run[A](use: Repos[F] => F[A]): F[A]
-  def transact[A](use: Repos[F] => F[A]): F[A]
+  def withSession[A](use: Repos[F] => F[A]): F[A]
+  def withTransaction[A](use: Repos[F] => F[A]): F[A]
   def isReady: F[Boolean]

@@ -10,13 +10,13 @@ import skunk.implicits.*
 object SkunkAppDb:
   def make[F[_]: Concurrent](pool: Resource[F, Session[F]]): AppDb[F] = new AppDb[F] {
     private def repos(session: Session[F]): Repos[F] = new Repos[F] {
-      override def challenges: ChallengeRepository[F] = SkunkChallengeRepository[F](session)
-      override def submissions: SubmissionRepository[F] = SkunkSubmissionRepository[F](session)
+      override val challenges: ChallengeRepository[F] = SkunkChallengeRepository[F](session)
+      override val submissions: SubmissionRepository[F] = SkunkSubmissionRepository[F](session)
     }
 
-    override def run[A](use: Repos[F] => F[A]): F[A] = pool.use(session => use(repos(session)))
+    override def withSession[A](use: Repos[F] => F[A]): F[A] = pool.use(session => use(repos(session)))
 
-    override def transact[A](use: Repos[F] => F[A]): F[A] =
+    override def withTransaction[A](use: Repos[F] => F[A]): F[A] =
       pool.use(session => session.transaction.use(_ => use(repos(session))))
 
     override def isReady: F[Boolean] =

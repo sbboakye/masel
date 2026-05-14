@@ -178,7 +178,7 @@ sealed trait AppError
 └── InternalError(message: String, cause: Option[Throwable])
 ```
 
-Services return `F[Either[AppError, A]]`. Http4s route handlers map `AppError` variants to HTTP status codes.
+Services return `F[A]]`. Http4s route handlers map `AppError` variants to HTTP status codes.
 
 ## API Endpoints
 

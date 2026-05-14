@@ -34,7 +34,7 @@ object Main extends IOApp:
         Ok(HealthResponse("ok"))
       case GET -> Root / "ready" =>
         appDb.isReady.flatMap {
-          case true => Ok(HealthResponse("ok"))
+          case true => Ok(ReadinessResponse("ok"))
           case false => ServiceUnavailable(ReadinessResponse("not ready"))
         }
     }

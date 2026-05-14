@@ -16,11 +16,11 @@ class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen}](
 ):
 
   def listChallenges(limit: Int, offset: Int): F[List[Challenge]] =
-    db.run(_.challenges.findAll(limit, offset))
+    db.withSession(_.challenges.findAll(limit, offset))
       .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))
 
   def getChallenge(id: ChallengeId): F[Challenge] =
-    db.run(_.challenges.findById(id))
+    db.withSession(_.challenges.findById(id))
       .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))
       .flatMap {
         case None => MonadError[F, Throwable].raiseError(AppError.NotFound("Challenge", id.value.toString))
@@ -44,7 +44,7 @@ class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen}](
         updatedAt = now,
       )
       created <- db
-        .run(_.challenges.create(challenge))
+        .withSession(_.challenges.create(challenge))
         .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))
 
     } yield created
@@ -65,7 +65,6 @@ class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen}](
           instructions = request.instructions.getOrElse(existing.instructions),
           status = request.status.getOrElse(existing.status),
           expectedSolution = request.expectedSolution.getOrElse(existing.expectedSolution),
-          output = request.output.orElse(existing.output),
           allottedTime = request.allottedTime.getOrElse(existing.allottedTime),
           difficulty = request.difficulty.getOrElse(existing.difficulty),
           updatedAt = now,
@@ -79,12 +78,12 @@ class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen}](
           }
       } yield updated
 
-    db.transact(helper)
+    db.withTransaction(helper)
 
   def deleteChallenge(id: ChallengeId): F[Unit] =
     for {
       deleted <- db
-        .run(_.challenges.delete(id))
+        .withSession(_.challenges.delete(id))
         .adaptError(e => AppError.InternalError(e.getMessage, Some(e)))
       _ <- MonadError[F, Throwable].raiseWhen(!deleted)(AppError.NotFound("Challenge", id.value.toString))
     } yield ()

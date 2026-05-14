@@ -19,33 +19,33 @@ class ChallengeRoutes[F[_]: Async](service: ChallengeService[F]):
   private object OffsetParam extends OptionalQueryParamDecoderMatcher[Int]("offset")
 
   val routes: HttpRoutes[F] = HttpRoutes.of[F] {
-    case GET -> Root / "api" / "v1" / "challenges" :? LimitParam(limit) +& OffsetParam(offset) =>
+    case GET -> basePath / "challenges" :? LimitParam(limit) +& OffsetParam(offset) =>
       service
         .listChallenges(limit.getOrElse(10), offset.getOrElse(0))
         .flatMap(Ok(_))
         .recoverAppErrors(dsl)
 
-    case GET -> Root / "api" / "v1" / "challenges" / UUIDVar(id) =>
+    case GET -> basePath / "challenges" / UUIDVar(id) =>
       service
         .getChallenge(ChallengeId(id))
         .flatMap(Ok(_))
         .recoverAppErrors(dsl)
 
-    case req @ POST -> Root / "api" / "v1" / "challenges" =>
+    case req @ POST -> basePath / "challenges" =>
       req
         .as[CreateChallengeRequest]
         .flatMap(service.createChallenge)
         .flatMap(Created(_))
         .recoverAppErrors(dsl)
 
-    case req @ PUT -> Root / "api" / "v1" / "challenges" / UUIDVar(id) =>
+    case req @ PUT -> basePath / "challenges" / UUIDVar(id) =>
       req
         .as[UpdateChallengeRequest]
         .flatMap(service.updateChallenge(ChallengeId(id), _))
         .flatMap(Ok(_))
         .recoverAppErrors(dsl)
 
-    case DELETE -> Root / "api" / "v1" / "challenges" / UUIDVar(id) =>
+    case DELETE -> basePath / "challenges" / UUIDVar(id) =>
       service
         .deleteChallenge(ChallengeId(id))
         .flatMap(_ => NoContent())

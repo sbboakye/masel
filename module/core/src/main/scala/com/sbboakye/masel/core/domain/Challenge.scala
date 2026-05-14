@@ -2,6 +2,7 @@ package com.sbboakye.masel.core.domain
 
 import io.circe.generic.semiauto.*
 import io.circe.{Decoder, Encoder}
+import io.github.iltotore.iron.circe.given
 import java.time.OffsetDateTime
 
 enum ChallengeStatus:
