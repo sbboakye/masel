@@ -1,8 +1,8 @@
 package com.sbboakye.masel.app.services
 
 import cats.*
+import cats.effect.Clock
 import cats.effect.std.UUIDGen
-import cats.effect.{Async, Clock}
 import cats.syntax.all.*
 import com.sbboakye.masel.app.requests.{CreateChallengeRequest, UpdateChallengeRequest}
 import com.sbboakye.masel.core.domain.ChallengeStatus.Draft

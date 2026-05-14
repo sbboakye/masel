@@ -84,7 +84,7 @@ Tables: `challenges`, `submissions` (FK: `submissions.challenge_id → challenge
 
 ## Testing
 
-- Unit tests: MUnit + ScalaCheck (property-based)
+- Unit tests: Scalatest + ScalaCheck (property-based)
 - Integration tests (persistence): Testcontainers Postgres — tests spin up a real Postgres container; no mocking the database
 - Test files mirror `src/main/scala` structure under `src/test/scala`
 

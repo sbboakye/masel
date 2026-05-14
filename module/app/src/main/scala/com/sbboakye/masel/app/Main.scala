@@ -3,7 +3,7 @@ package com.sbboakye.masel.app
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import cats.syntax.all.*
 import com.sbboakye.masel.app.endpoints.{HealthResponse, ReadinessResponse}
-import com.sbboakye.masel.app.routes.{ChallengeRoutes, SubmissionRoutes}
+import com.sbboakye.masel.app.routes.{ChallengeRoutes, HeartbeatRoutes, SubmissionRoutes}
 import com.sbboakye.masel.app.services.{ChallengeService, SubmissionService}
 import com.sbboakye.masel.persistence.FlywayMigrator
 import com.sbboakye.masel.persistence.repositories.SkunkAppDb
@@ -25,19 +25,6 @@ object Main extends IOApp:
       config <- AppConfig.loadF[IO]
       _ <- buildApp(config).useForever
     yield ExitCode.Success
-
-  private def heartbeatRoutes(appDb: com.sbboakye.masel.core.ports.AppDb[IO]): HttpRoutes[IO] =
-    val dsl = new Http4sDsl[IO] {}
-    import dsl.*
-    HttpRoutes.of[IO] {
-      case GET -> Root / "health" =>
-        Ok(HealthResponse("ok"))
-      case GET -> Root / "ready" =>
-        appDb.isReady.flatMap {
-          case true => Ok(ReadinessResponse("ok"))
-          case false => ServiceUnavailable(ReadinessResponse("not ready"))
-        }
-    }
 
   private def buildApp(config: AppConfig): Resource[IO, Server] =
     for
@@ -66,11 +53,12 @@ object Main extends IOApp:
       challengeService = ChallengeService[IO](appDb)
       submissionService = SubmissionService[IO](appDb)
 
+      heartbeatRoutes = HeartbeatRoutes[IO](appDb)
       challengeRoutes = ChallengeRoutes[IO](challengeService)
       submissionRoutes = SubmissionRoutes[IO](submissionService)
 
       httpApp = Router(
-        "/" -> (heartbeatRoutes(appDb) <+> challengeRoutes.routes <+> submissionRoutes.routes),
+        "/" -> (heartbeatRoutes.routes <+> challengeRoutes.routes <+> submissionRoutes.routes),
       ).orNotFound
 
       _ <- Resource.eval(logger.info("Starting server"))
