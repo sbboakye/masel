@@ -12,10 +12,10 @@ import java.time.ZoneOffset
 
 class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen}](db: AppDb[F]):
   def listSubmissions(limit: Int, offset: Int): F[List[Submission]] =
-    db.dbCall(db.withSession(_.submissions.findAll(limit, offset)))
+    db.withSession(_.submissions.findAll(limit, offset))
 
   def getSubmission(id: SubmissionId): F[Submission] =
-    db.dbCall(db.withSession(_.submissions.findById(id)))
+    db.withSession(_.submissions.findById(id))
       .flatMap {
         case None => MonadError[F, Throwable].raiseError(AppError.NotFound("Submission", id.value.toString))
         case Some(submission) => submission.pure
@@ -25,15 +25,18 @@ class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen}](db: AppDb[F]):
     for {
       id <- SubmissionId.generate[F]
       now <- Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
-      challenge <- db.dbCall(
+      challenge <-
         db
-          .withSession(_.challenges.findById(request.challengeId))
-          .flatMap {
-            case None =>
-              MonadError[F, Throwable].raiseError(AppError.NotFound("Challenge", request.challengeId.value.toString))
-            case Some(challenge) => challenge.pure
-          },
-      )
+          .withSession(
+            _.challenges
+              .findById(request.challengeId)
+              .flatMap {
+                case None =>
+                  MonadError[F, Throwable]
+                    .raiseError(AppError.NotFound("Challenge", request.challengeId.value.toString))
+                case Some(challenge) => challenge.pure
+              },
+          )
       submission = Submission(
         id = id,
         challengeId = challenge.id,
@@ -43,10 +46,9 @@ class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen}](db: AppDb[F]):
         createdAt = now,
         updatedAt = now,
       )
-      created <- db.dbCall(
+      created <-
         db
-          .withSession(_.submissions.create(submission)),
-      )
+          .withSession(_.submissions.create(submission))
     } yield created
 
   def updateSubmission(id: SubmissionId, request: UpdateSubmissionRequest): F[Submission] =
@@ -73,13 +75,12 @@ class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen}](db: AppDb[F]):
           }
       } yield updated
 
-    db.dbCall(db.withTransaction(helper))
+    db.withTransaction(helper)
 
   def deleteSubmission(id: SubmissionId): F[Unit] =
     for {
-      deleted <- db.dbCall(
+      deleted <-
         db
-          .withSession(_.submissions.delete(id)),
-      )
+          .withSession(_.submissions.delete(id))
       _ <- MonadError[F, Throwable].raiseWhen(!deleted)(AppError.NotFound("Submission", id.value.toString))
     } yield ()

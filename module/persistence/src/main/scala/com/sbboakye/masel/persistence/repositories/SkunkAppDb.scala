@@ -3,7 +3,6 @@ package com.sbboakye.masel.persistence.repositories
 import cats.Applicative
 import cats.effect.*
 import cats.syntax.all.*
-import com.sbboakye.masel.core.errors.AppError
 import com.sbboakye.masel.core.ports.{AppDb, ChallengeRepository, Repos, SubmissionRepository}
 import org.typelevel.log4cats.{LoggerFactory, SelfAwareStructuredLogger}
 import skunk.Session
@@ -13,12 +12,6 @@ import skunk.implicits.*
 object SkunkAppDb:
   def make[F[_]: {Concurrent, LoggerFactory}](pool: Resource[F, Session[F]]): AppDb[F] = new AppDb[F] {
     val logger: SelfAwareStructuredLogger[F] = LoggerFactory[F].getLogger
-
-    override def dbCall[A](fa: F[A]): F[A] =
-      fa.adaptError { case e =>
-        logger.error(s"Error executing database call: $e")
-        AppError.DatabaseError
-      }
 
     private def repos(session: Session[F]): Repos[F] = new Repos[F] {
       override val challenges: ChallengeRepository[F] = SkunkChallengeRepository[F](session)

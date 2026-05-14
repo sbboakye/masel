@@ -12,19 +12,21 @@ import com.sbboakye.masel.core.ports.{AppDb, Repos}
 import java.time.ZoneOffset
 import org.typelevel.log4cats.{LoggerFactory, SelfAwareStructuredLogger}
 
-class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen}](
+class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen, LoggerFactory}](
     db: AppDb[F],
-):
+) extends Helpers[F]:
 
   def listChallenges(limit: Int, offset: Int): F[List[Challenge]] =
-    db.dbCall(db.withSession(_.challenges.findAll(limit, offset)))
+    serviceHandler(db.withSession(_.challenges.findAll(limit, offset)))
 
   def getChallenge(id: ChallengeId): F[Challenge] =
-    db.dbCall(db.withSession(_.challenges.findById(id)))
-      .flatMap {
-        case None => MonadError[F, Throwable].raiseError(AppError.NotFound("Challenge", id.value.toString))
-        case Some(challenge) => challenge.pure
-      }
+    serviceHandler(
+      db.withSession(_.challenges.findById(id))
+        .flatMap {
+          case None => MonadError[F, Throwable].raiseError(AppError.NotFound("Challenge", id.value.toString))
+          case Some(challenge) => challenge.pure
+        },
+    )
 
   def createChallenge(request: CreateChallengeRequest): F[Challenge] =
     for {
@@ -42,10 +44,11 @@ class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen}](
         createdAt = now,
         updatedAt = now,
       )
-      created <- db.dbCall(
-        db
-          .withSession(_.challenges.create(challenge)),
-      )
+      created <-
+        serviceHandler(
+          db
+            .withSession(_.challenges.create(challenge)),
+        )
 
     } yield created
 
@@ -77,13 +80,14 @@ class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen}](
           }
       } yield updated
 
-    db.dbCall(db.withTransaction(helper))
+    serviceHandler(db.withTransaction(helper))
 
   def deleteChallenge(id: ChallengeId): F[Unit] =
     for {
-      deleted <- db.dbCall(
-        db
-          .withSession(_.challenges.delete(id)),
-      )
+      deleted <-
+        serviceHandler(
+          db
+            .withSession(_.challenges.delete(id)),
+        )
       _ <- MonadError[F, Throwable].raiseWhen(!deleted)(AppError.NotFound("Challenge", id.value.toString))
     } yield ()

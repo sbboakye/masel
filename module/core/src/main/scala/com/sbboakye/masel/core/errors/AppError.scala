@@ -8,5 +8,3 @@ object AppError:
   case class ValidationFailed(errors: List[String]) extends AppError
 
   case object InternalError extends AppError
-
-  case object DatabaseError extends AppError
