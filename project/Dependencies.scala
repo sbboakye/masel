@@ -14,7 +14,7 @@ object Dependencies {
 
     // Database
     val skunk = "1.0.0"
-    val flyway = "12.5.0"
+    val flyway = "12.6.1"
     val postgresql = "42.7.11"
 
     // JSON
@@ -29,11 +29,10 @@ object Dependencies {
     val logback = "1.5.32"
 
     // Testing
-    val munit = "1.3.0"
-    val munitCatsEffect = "2.2.0"
     val scalaCheck = "1.19.0"
     val testcontainers = "0.44.1"
     val scalatest = "3.2.20"
+    val scalatestPlus = "3.2.20.0"
   }
 
   // Core
@@ -76,7 +75,8 @@ object Dependencies {
   // Testing
   val scalaCheck = "org.scalacheck" %% "scalacheck" % Versions.scalaCheck % Test
   val scalactic = "org.scalactic" %% "scalactic" % Versions.scalatest % Test
-  val scalacTest = "org.scalatest" %% "scalatest" % Versions.scalatest % Test
+  val scalaTest = "org.scalatest" %% "scalatest" % Versions.scalatest % Test
+  val scalaTestPlus = "org.scalatestplus" %% "scalacheck-1-19" % Versions.scalatestPlus % Test
   val testcontainersPostgres = "com.dimafeng" %% "testcontainers-scala-postgresql" % Versions.testcontainers % Test
   val testcontainersScalatest = "com.dimafeng" %% "testcontainers-scala-scalatest" % Versions.testcontainers % Test
   val testcontainersMunit = "com.dimafeng" %% "testcontainers-scala-munit" % Versions.testcontainers % Test
@@ -125,6 +125,6 @@ object Dependencies {
   )
 
   val testDeps: Seq[ModuleID] =
-    Seq(scalaCheck, testcontainersMunit, scalactic, scalacTest, catsEffectTest)
+    Seq(scalaCheck, testcontainersMunit, scalactic, scalaTest, scalaTestPlus, catsEffectTest)
 
 }

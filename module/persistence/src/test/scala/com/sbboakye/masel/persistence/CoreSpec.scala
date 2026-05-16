@@ -5,14 +5,14 @@ import cats.effect.{IO, Resource}
 import com.dimafeng.testcontainers.{JdbcDatabaseContainer, PostgreSQLContainer}
 import com.sbboakye.masel.persistence.session.PoolSession
 import org.testcontainers.utility.DockerImageName
-import org.typelevel.log4cats.Logger
-import org.typelevel.log4cats.slf4j.Slf4jLogger
+import org.typelevel.log4cats.slf4j.{Slf4jFactory, Slf4jLogger}
+import org.typelevel.log4cats.{Logger, LoggerFactory}
 import skunk.*
 
 trait CoreSpec:
   val initSqlString: String
 
-  given logger: Logger[IO] = Slf4jLogger.getLogger[IO]
+  given LoggerFactory[IO] = Slf4jFactory.create[IO]
 
   val postgres: Resource[IO, PostgreSQLContainer] = {
     val acquire = IO {
