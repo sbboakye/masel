@@ -26,28 +26,27 @@ class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen, LoggerFactory}](
     )
 
   def createChallenge(request: CreateChallengeRequest): F[Challenge] =
-    for {
-      id <- ChallengeId.generate[F]
-      now <- Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
-      challenge = Challenge(
-        id = id,
-        title = request.title,
-        instructions = request.instructions,
-        status = Draft,
-        expectedSolution = request.expectedSolution,
-        output = None,
-        allottedTime = request.allottedTime,
-        difficulty = request.difficulty,
-        createdAt = now,
-        updatedAt = now,
-      )
-      created <-
-        serviceHandler(
-          db
-            .withSession(_.challenges.create(challenge)),
+    serviceHandler(
+      for {
+        id <- ChallengeId.generate[F]
+        now <- Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
+        challenge = Challenge(
+          id = id,
+          title = request.title,
+          instructions = request.instructions,
+          status = Draft,
+          expectedSolution = request.expectedSolution,
+          output = None,
+          allottedTime = request.allottedTime,
+          difficulty = request.difficulty,
+          createdAt = now,
+          updatedAt = now,
         )
+        created <- db
+          .withSession(_.challenges.create(challenge))
 
-    } yield created
+      } yield created,
+    )
 
   def updateChallenge(id: ChallengeId, request: UpdateChallengeRequest): F[Challenge] =
     def helper(repos: Repos[F]): F[Challenge] =
@@ -74,11 +73,9 @@ class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen, LoggerFactory}](
     serviceHandler(db.withTransaction(helper))
 
   def deleteChallenge(id: ChallengeId): F[Unit] =
-    for {
+    serviceHandler(for {
       deleted <-
-        serviceHandler(
-          db
-            .withSession(_.challenges.delete(id)),
-        )
+        db
+          .withSession(_.challenges.delete(id))
       _ <- AppError.NotFound("Challenge", id.value.toString).raiseError[F, Unit].whenA(!deleted)
-    } yield ()
+    } yield ())

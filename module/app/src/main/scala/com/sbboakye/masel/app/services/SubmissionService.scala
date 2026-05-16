@@ -11,7 +11,7 @@ import com.sbboakye.masel.core.ports.{AppDb, Repos}
 import java.time.ZoneOffset
 import org.typelevel.log4cats.LoggerFactory
 
-class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen, LoggerFactory}](db: AppDb[F]) extends Helpers:
+class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen, LoggerFactory}](db: AppDb[F]) extends Helpers[F]:
   def listSubmissions(limit: Int, offset: Int): F[List[Submission]] =
     serviceHandler(db.withSession(_.submissions.findAll(limit, offset)))
 
@@ -27,14 +27,9 @@ class SubmissionService[F[_]: {Clock, MonadThrow, UUIDGen, LoggerFactory}](db: A
         id <- SubmissionId.generate[F]
         now <- Clock[F].realTimeInstant.map(_.atOffset(ZoneOffset.UTC))
         challenge <-
-          serviceHandler(
-            db
-              .withSession(
-                _.challenges
-                  .findById(request.challengeId)
-                  .orNotFound("Challenge", request.challengeId.value.toString),
-              ),
-          )
+          repos.challenges
+            .findById(request.challengeId)
+            .orNotFound("Challenge", request.challengeId.value.toString)
         submission = Submission(
           id = id,
           challengeId = challenge.id,
