@@ -1,6 +1,5 @@
 package com.sbboakye.masel.core.ports
 
-import cats.MonadThrow
 import com.sbboakye.masel.core.domain.{Challenge, ChallengeId, Submission, SubmissionId}
 
 trait ChallengeRepository[F[_]]:

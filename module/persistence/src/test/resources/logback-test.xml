@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="WARN">
+    <appender-ref ref="STDOUT"/>
+  </root>
+
+  <!-- Testcontainers + Flyway can be noisy in test output. -->
+  <logger name="org.testcontainers" level="WARN"/>
+  <logger name="com.github.dockerjava" level="WARN"/>
+  <logger name="org.flywaydb" level="WARN"/>
+
+  <!-- Silence the repo-level Helpers logger; tests intentionally trigger its error path. -->
+  <logger name="com.sbboakye.masel.persistence.repositories.Helpers" level="OFF"/>
+</configuration>

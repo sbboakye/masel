@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="WARN">
+    <appender-ref ref="STDOUT"/>
+  </root>
+
+  <!-- Silence service-layer Helpers; tests intentionally trigger its error path. -->
+  <logger name="com.sbboakye.masel.app.services.Helpers" level="OFF"/>
+  <!-- Silence ErrorHandling for the same reason — route tests deliberately fail. -->
+  <logger name="com.sbboakye.masel.app.routes.ErrorHandling" level="OFF"/>
+</configuration>
