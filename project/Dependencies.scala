@@ -79,7 +79,6 @@ object Dependencies {
   val scalaTestPlus = "org.scalatestplus" %% "scalacheck-1-19" % Versions.scalatestPlus % Test
   val testcontainersPostgres = "com.dimafeng" %% "testcontainers-scala-postgresql" % Versions.testcontainers % Test
   val testcontainersScalatest = "com.dimafeng" %% "testcontainers-scala-scalatest" % Versions.testcontainers % Test
-  val testcontainersMunit = "com.dimafeng" %% "testcontainers-scala-munit" % Versions.testcontainers % Test
   val catsEffectTest = "org.typelevel" %% "cats-effect-testing-scalatest" % "1.8.0" % Test
 
   // Dependency groups
@@ -125,6 +124,6 @@ object Dependencies {
   )
 
   val testDeps: Seq[ModuleID] =
-    Seq(scalaCheck, testcontainersMunit, scalactic, scalaTest, scalaTestPlus, catsEffectTest)
+    Seq(scalaCheck, scalactic, scalaTest, scalaTestPlus, catsEffectTest)
 
 }
