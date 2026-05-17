@@ -8,13 +8,13 @@ import skunk.Codec
 import skunk.codec.all.{int4, varchar}
 import skunk.data.Encoded
 
-/** Direct unit tests for the `refined[T]` Skunk codec adapter.
-  *
-  * These tests exercise the codec at the wire-format boundary, without going through
-  * Postgres. They lock in: the encode is a passthrough to the base codec, the decode
-  * round-trips valid values, and the decode fails for any value that doesn't satisfy
-  * the Iron constraint.
-  */
+/**
+ * Direct unit tests for the `refined[T]` Skunk codec adapter.
+ *
+ * These tests exercise the codec at the wire-format boundary, without going through Postgres. They lock in: the encode
+ * is a passthrough to the base codec, the decode round-trips valid values, and the decode fails for any value that
+ * doesn't satisfy the Iron constraint.
+ */
 class RefinedCodecTests extends AnyFreeSpec with Matchers:
 
   /** Skunk's encode returns wrapped [[Encoded]] strings; decode wants raw strings. */

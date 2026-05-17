@@ -22,7 +22,7 @@ class SkunkCodecTests extends AnyFreeSpec with Matchers:
 
   "challengeId codec" - {
     "round-trips a UUID via encode/decode" in {
-      val id      = ChallengeId(UUID.randomUUID())
+      val id = ChallengeId(UUID.randomUUID())
       val encoded = SkunkCodec.challengeId.encode(id).asStrings
       encoded shouldBe List(Some(id.value.toString))
       SkunkCodec.challengeId.decode(0, encoded) shouldBe Right(id)
@@ -35,7 +35,7 @@ class SkunkCodecTests extends AnyFreeSpec with Matchers:
 
   "submissionId codec" - {
     "round-trips a UUID via encode/decode" in {
-      val id      = SubmissionId(UUID.randomUUID())
+      val id = SubmissionId(UUID.randomUUID())
       val encoded = SkunkCodec.submissionId.encode(id).asStrings
       encoded shouldBe List(Some(id.value.toString))
       SkunkCodec.submissionId.decode(0, encoded) shouldBe Right(id)
@@ -56,11 +56,10 @@ class SkunkCodecTests extends AnyFreeSpec with Matchers:
       SkunkCodec.challengeStatus.decode(0, List(Some("ArChIvEd"))) shouldBe Right(ChallengeStatus.Archived)
     }
 
-    "round-trips every enum value" in {
+    "round-trips every enum value" in
       ChallengeStatus.values.foreach { s =>
         SkunkCodec.challengeStatus.decode(0, SkunkCodec.challengeStatus.encode(s).asStrings) shouldBe Right(s)
       }
-    }
 
     "fails to decode an unknown enum literal" in {
       SkunkCodec.challengeStatus.decode(0, List(Some("retired"))).isLeft shouldBe true
@@ -79,11 +78,10 @@ class SkunkCodecTests extends AnyFreeSpec with Matchers:
       SkunkCodec.challengeDifficulty.decode(0, List(Some("medium"))) shouldBe Right(ChallengeDifficulty.Medium)
     }
 
-    "round-trips every enum value" in {
+    "round-trips every enum value" in
       ChallengeDifficulty.values.foreach { d =>
         SkunkCodec.challengeDifficulty.decode(0, SkunkCodec.challengeDifficulty.encode(d).asStrings) shouldBe Right(d)
       }
-    }
 
     "fails to decode an unknown enum literal" in {
       SkunkCodec.challengeDifficulty.decode(0, List(Some("epic"))).isLeft shouldBe true

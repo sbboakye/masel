@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Cancel old PR runs when a newer commit arrives; let branch builds finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+    # Docker is preinstalled on ubuntu-latest, which is what the persistence
+    # tests' Testcontainers Postgres requires.
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up sbt
+        uses: sbt/setup-sbt@v1
+
+      - name: Cache sbt + coursier + ivy
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.sbt
+            ~/.ivy2/cache
+            ~/.cache/coursier
+          key: ${{ runner.os }}-sbt-${{ hashFiles('build.sbt', 'project/build.properties', 'project/Dependencies.scala', 'project/plugins.sbt') }}
+          restore-keys: |
+            ${{ runner.os }}-sbt-
+
+      - name: Check formatting
+        run: sbt scalafmtCheckAll scalafmtSbtCheck
+
+      - name: Compile (main + tests)
+        run: sbt "Test / compile"
+
+      - name: Run tests
+        run: sbt test
