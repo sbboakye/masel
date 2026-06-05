@@ -34,6 +34,7 @@ class ChallengeService[F[_]: {Clock, MonadThrow, UUIDGen, LoggerFactory}](
           id = id,
           title = request.title,
           instructions = request.instructions,
+          setupSql = request.setupSql,
           status = Draft,
           expectedSolution = request.expectedSolution,
           output = None,

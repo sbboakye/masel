@@ -31,6 +31,7 @@ object ChallengeQueries:
           id,
           title,
           instructions,
+          setup_sql,
           status,
           expected_solution,
           output,
@@ -49,6 +50,7 @@ object ChallengeQueries:
           id,
           title,
           instructions,
+          setup_sql,
           status,
           expected_solution,
           output,
@@ -62,7 +64,7 @@ object ChallengeQueries:
 
   def create: Query[Challenge, Challenge] =
     sql"""
-      INSERT INTO challenges (id, title, instructions, status, expected_solution, output, allotted_time, difficulty, created_at, updated_at)
+      INSERT INTO challenges (id, title, instructions, setup_sql, status, expected_solution, output, allotted_time, difficulty, created_at, updated_at)
       VALUES (
         $challengeCodec
       )
@@ -74,6 +76,7 @@ object ChallengeQueries:
       UPDATE challenges
       SET title = $domainVarchar,
           instructions = $domainText,
+          setup_sql = $domainText,
           status = $challengeStatus,
           expected_solution = $domainText,
           output = ${jsonb.opt},
@@ -88,6 +91,7 @@ object ChallengeQueries:
         (
           (c.title: NonEmptyString),
           (c.instructions: NonEmptyString),
+          (c.setupSql: NonEmptyString),
           c.status,
           (c.expectedSolution: NonEmptyString),
           c.output,

@@ -8,6 +8,7 @@ import io.github.iltotore.iron.circe.given
 case class CreateChallengeRequest(
     title: NonEmptyString,
     instructions: NonEmptyString,
+    setupSql: NonEmptyString,
     expectedSolution: NonEmptyString,
     allottedTime: PositiveInt,
     difficulty: ChallengeDifficulty,
@@ -20,6 +21,7 @@ object CreateChallengeRequest:
 case class UpdateChallengeRequest(
     title: Option[NonEmptyString],
     instructions: Option[NonEmptyString],
+    setupSql: Option[NonEmptyString],
     status: Option[ChallengeStatus],
     expectedSolution: Option[NonEmptyString],
     output: Option[io.circe.Json],

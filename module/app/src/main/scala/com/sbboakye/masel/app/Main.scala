@@ -2,15 +2,11 @@ package com.sbboakye.masel.app
 
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import cats.syntax.all.*
-import com.sbboakye.masel.app.endpoints.{HealthResponse, ReadinessResponse}
 import com.sbboakye.masel.app.routes.{ChallengeRoutes, HeartbeatRoutes, SubmissionRoutes}
 import com.sbboakye.masel.app.services.{ChallengeService, SubmissionService}
 import com.sbboakye.masel.persistence.FlywayMigrator
 import com.sbboakye.masel.persistence.repositories.SkunkAppDb
 import com.sbboakye.masel.persistence.session.PoolSession
-import org.http4s.HttpRoutes
-import org.http4s.circe.CirceEntityCodec.*
-import org.http4s.dsl.Http4sDsl
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.{Router, Server}
 import org.typelevel.log4cats.LoggerFactory

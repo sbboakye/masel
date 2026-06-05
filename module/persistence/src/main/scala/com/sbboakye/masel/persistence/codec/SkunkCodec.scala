@@ -36,6 +36,7 @@ object SkunkCodec:
   val challengeCodecTypes = challengeId *:
     domainVarchar *:
     domainText *:
+    domainText *:
     challengeStatus *:
     domainText *:
     jsonb.opt *:

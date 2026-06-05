@@ -27,6 +27,7 @@ case class Challenge(
     id: ChallengeId,
     title: NonEmptyString,
     instructions: NonEmptyString,
+    setupSql: NonEmptyString,
     status: ChallengeStatus,
     expectedSolution: NonEmptyString,
     output: Option[io.circe.Json],
