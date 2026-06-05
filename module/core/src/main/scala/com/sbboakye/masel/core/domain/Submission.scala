@@ -1,6 +1,6 @@
 package com.sbboakye.masel.core.domain
 
-import com.sbboakye.masel.core.domain.QuerySql.QuerySql
+import com.sbboakye.masel.core.domain.QuerySql
 import io.circe.generic.semiauto.*
 import io.circe.{Decoder, Encoder}
 import io.github.iltotore.iron.circe.given

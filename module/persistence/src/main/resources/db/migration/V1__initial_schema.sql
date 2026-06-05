@@ -7,6 +7,7 @@ CREATE TABLE challenges (
     id               UUID PRIMARY KEY,
     title            VARCHAR NOT NULL,
     instructions     TEXT NOT NULL,
+    setup_sql        TEXT NOT NULL,
     status           challenge_status NOT NULL DEFAULT 'draft',
     expected_solution TEXT NOT NULL,
     output           JSONB,

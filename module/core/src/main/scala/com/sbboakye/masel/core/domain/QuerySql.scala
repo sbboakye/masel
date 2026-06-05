@@ -5,8 +5,9 @@ import com.sbboakye.masel.core.errors.AppError.ValidationFailed
 import io.circe.{Decoder, Encoder}
 import io.github.iltotore.iron.circe.given
 
+type QuerySql = NonEmptyString
+
 object QuerySql:
-  opaque type QuerySql = NonEmptyString
 
   given Encoder[QuerySql] = Encoder[NonEmptyString]
   given Decoder[QuerySql] = Decoder[NonEmptyString]
