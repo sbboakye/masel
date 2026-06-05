@@ -37,7 +37,7 @@ object AppConfig:
     val databaseConfig: ConfigValue[Effect, DatabaseConfig] =
       (
         env("DB_HOST").as[Host].default(ipv4"127.0.0.1"),
-        env("DB_PORT").as[Port].default(port"5432"),
+        env("DB_PORT").as[Port].default(port"5433"),
         env("DB_USERNAME").as[NonEmptyString].default("masel"),
         env("DB_NAME").as[NonEmptyString].default("masel"),
         env("DB_PASSWORD").as[DatabasePassword].secret.redacted,
@@ -47,7 +47,7 @@ object AppConfig:
     val sandboxConfig: ConfigValue[Effect, DatabaseConfig] =
       (
         env("DB_HOST").as[Host].default(ipv4"127.0.0.1"),
-        env("DB_PORT").as[Port].default(port"5433"),
+        env("DB_PORT").as[Port].default(port"5434"),
         env("DB_USERNAME").as[NonEmptyString].default("sandbox"),
         env("DB_NAME").as[NonEmptyString].default("sandbox"),
         env("DB_PASSWORD").as[DatabasePassword].secret.redacted,

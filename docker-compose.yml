@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: masel
       POSTGRES_PASSWORD: maselmasel
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -22,9 +22,9 @@ services:
       POSTGRES_USER: sandbox
       POSTGRES_PASSWORD: sandboxsandbox
     ports:
-      - "5433:5432"
+      - "5434:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - sandbox_data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U masel" ]
       interval: 10s
@@ -33,3 +33,4 @@ services:
 
 volumes:
   postgres_data:
+  sandbox_data:
