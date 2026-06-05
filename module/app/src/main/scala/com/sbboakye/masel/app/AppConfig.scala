@@ -28,6 +28,7 @@ case class ServerConfig(
 
 case class AppConfig(
     database: DatabaseConfig,
+    sandbox: DatabaseConfig,
     server: ServerConfig,
 )
 
@@ -43,6 +44,16 @@ object AppConfig:
         env("DB_MAX_POOL_SIZE").as[Int].default(10),
       ).parMapN(DatabaseConfig.apply)
 
+    val sandboxConfig: ConfigValue[Effect, DatabaseConfig] =
+      (
+        env("DB_HOST").as[Host].default(ipv4"127.0.0.1"),
+        env("DB_PORT").as[Port].default(port"5433"),
+        env("DB_USERNAME").as[NonEmptyString].default("sandbox"),
+        env("DB_NAME").as[NonEmptyString].default("sandbox"),
+        env("DB_PASSWORD").as[DatabasePassword].secret.redacted,
+        env("DB_MAX_POOL_SIZE").as[Int].default(10),
+      ).parMapN(DatabaseConfig.apply)
+
     val serverConfig: ConfigValue[Effect, ServerConfig] =
       (
         env("SERVER_HOST").as[Host].default(ipv4"0.0.0.0"),
@@ -52,6 +63,7 @@ object AppConfig:
     val config: ConfigValue[Effect, AppConfig] =
       (
         databaseConfig,
+        sandboxConfig,
         serverConfig,
       ).parMapN(AppConfig.apply)
 

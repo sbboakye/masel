@@ -44,7 +44,18 @@ object Main extends IOApp:
       )
       _ <- Resource.eval(logger.info("Database connection established"))
 
+      sandboxPool <- PoolSession.make[IO](
+        host = config.sandbox.host.show,
+        port = config.sandbox.port.value,
+        database = config.sandbox.dbName,
+        username = config.sandbox.username,
+        password = config.sandbox.password.value,
+        maxPoolSize = config.sandbox.maxPoolSize,
+      )
+      _ <- Resource.eval(logger.info("Sandbox connection established"))
+
       appDb = SkunkAppDb.make[IO](appPool)
+      sandboxDb = SkunkAppDb.make[IO](sandboxPool)
 
       challengeService = ChallengeService[IO](appDb)
       submissionService = SubmissionService[IO](appDb)

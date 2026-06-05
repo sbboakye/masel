@@ -1,5 +1,5 @@
 services:
-  postgres:
+  main_db:
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: masel
@@ -7,6 +7,22 @@ services:
       POSTGRES_PASSWORD: maselmasel
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U masel" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  sandbox_db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: sandbox
+      POSTGRES_USER: sandbox
+      POSTGRES_PASSWORD: sandboxsandbox
+    ports:
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
