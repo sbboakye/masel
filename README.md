@@ -10,19 +10,19 @@ Building the compilable project skeleton: domain types, persistence layer, Flywa
 
 ## Tech Stack
 
-| Concern | Choice |
-|---|---|
-| Language | Scala 3 |
-| FP Core | Cats + Cats Effect 3 |
-| HTTP | http4s (Ember) |
-| Database | PostgreSQL via Skunk |
-| Migrations | Flyway |
-| Streaming | fs2 |
-| JSON | circe |
-| Config | ciris |
-| Refinement Types | Iron |
-| Testing | MUnit + ScalaCheck |
-| Build | sbt 1.12.9 |
+| Concern | Choice                 |
+|---|------------------------|
+| Language | Scala 3                |
+| FP Core | Cats + Cats Effect 3   |
+| HTTP | http4s (Ember)         |
+| Database | PostgreSQL via Skunk   |
+| Migrations | Flyway                 |
+| Streaming | fs2                    |
+| JSON | circe                  |
+| Config | ciris                  |
+| Refinement Types | Iron                   |
+| Testing | Scalatest + ScalaCheck |
+| Build | sbt 1.12.9             |
 
 ## Project Structure
 
