@@ -1,20 +1,12 @@
 package com.sbboakye.masel.core.domain
 
-import cats.data.NonEmptyList
-import io.circe.Json
+import io.circe.{Decoder, Encoder}
+import io.github.iltotore.iron.circe.given
 
-sealed trait SetupStep
+object SetupSql:
+  opaque type SetupSql = NonEmptyString
 
-opaque type TableName = String
-opaque type ColumnName = String
+  given Encoder[SetupSql] = Encoder[NonEmptyString]
+  given Decoder[SetupSql] = Decoder[NonEmptyString]
 
-enum SqlType:
-  case Integer, BigInt, Text, Boolean, Timestamp, Json
-
-case class Column(name: ColumnName, dataType: SqlType, nullable: Boolean = true, primaryKey: Boolean = false)
-
-object SetupStep:
-  final case class CreateTable(tableName: TableName, columns: NonEmptyList[Column]) extends SetupStep
-  final case class Insert(tableName: TableName, values: List[Map[ColumnName, Json]]) extends SetupStep
-
-final case class SetupSql(steps: NonEmptyList[SetupStep])
+  extension (sql: SetupSql) def value: String = sql

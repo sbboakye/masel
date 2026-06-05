@@ -1,5 +1,7 @@
 package com.sbboakye.masel.core.domain
 
+import com.sbboakye.masel.core.domain.QuerySql.QuerySql
+import com.sbboakye.masel.core.domain.SetupSql.SetupSql
 import io.circe.generic.semiauto.*
 import io.circe.{Decoder, Encoder}
 import io.github.iltotore.iron.circe.given
@@ -27,9 +29,9 @@ case class Challenge(
     id: ChallengeId,
     title: NonEmptyString,
     instructions: NonEmptyString,
-    setupSql: NonEmptyString,
+    setupSql: SetupSql,
     status: ChallengeStatus,
-    expectedSolution: NonEmptyString,
+    expectedSolution: QuerySql,
     output: Option[io.circe.Json],
     allottedTime: PositiveInt,
     difficulty: ChallengeDifficulty,
