@@ -6,25 +6,10 @@ import cats.syntax.all.*
 import ciris.*
 import ciris.http4s.*
 import com.comcast.ip4s.*
-import com.sbboakye.masel.core.domain.{DatabasePassword, NonEmptyString}
+import com.sbboakye.masel.core.domain.{DatabaseConfig, DatabasePassword, NonEmptyString, ServerConfig}
 import io.github.iltotore.iron.autoRefine
 import io.github.iltotore.iron.cats.given
 import io.github.iltotore.iron.ciris.given
-
-case class DatabaseConfig(
-    host: Host,
-    port: Port,
-    username: NonEmptyString,
-    dbName: NonEmptyString,
-    password: Secret[DatabasePassword],
-    maxPoolSize: Int,
-):
-  val jdbcUrl: String = s"jdbc:postgresql://${host.toString}:${port.toString}/$dbName"
-
-case class ServerConfig(
-    host: Host,
-    port: Port,
-)
 
 case class AppConfig(
     database: DatabaseConfig,

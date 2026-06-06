@@ -9,7 +9,7 @@ lazy val core = (project in file("module/core"))
   )
 
 lazy val engine = (project in file("module/engine"))
-  .dependsOn(core)
+  .dependsOn(core, persistence)
   .settings(
     name := "masel-engine",
     libraryDependencies ++= Dependencies.engineDeps ++ Dependencies.testDeps,
