@@ -8,6 +8,7 @@ import com.sbboakye.masel.core.domain.{DatabaseConfig, QuerySql, SetupSql, Submi
 import com.sbboakye.masel.core.errors.AppError
 import com.sbboakye.masel.core.ports.SqlExecutor
 import io.circe.Json
+import org.typelevel.log4cats.LoggerFactory
 import org.typelevel.otel4s.metrics.Meter.Implicits.noop
 import org.typelevel.otel4s.trace.Tracer.Implicits.noop
 import skunk.*
@@ -15,17 +16,16 @@ import skunk.Session.Credentials
 import skunk.data.Completion
 import skunk.implicits.*
 
-class Executor[F[_]: {Async, Console}] extends SqlExecutor[F, Session[F]]:
+class Executor[F[_]: {Async, Console, LoggerFactory}](sandboxConfig: DatabaseConfig) extends SqlExecutor[F, Session[F]]:
+  private val logger = LoggerFactory[F].getLogger
 
-  override def sandbox(sql: QuerySql, id: SubmissionId, sandboxConfig: DatabaseConfig)(
+  override def sandbox(id: SubmissionId)(
       using F: MonadThrow[F],
   ): Resource[F, Session[F]] = {
     val schemaName: String = s"sub_${id.value.toString.replace("-", "")}"
 
     val createSchemaCommand: Command[Void] = sql"CREATE SCHEMA #$schemaName".command
-    val searchPath: Command[Void] = sql"SET search_path TO #$schemaName".command
-    val acquireCommands: List[Command[Void]] = List(createSchemaCommand, searchPath)
-
+    val searchPathCommand: Command[Void] = sql"SET search_path TO #$schemaName".command
     val dropSchemaCommand: Command[Void] = sql"DROP SCHEMA #$schemaName CASCADE".command
 
     def schemaDropped(c: Completion): F[Unit] = c match
@@ -47,8 +47,12 @@ class Executor[F[_]: {Async, Console}] extends SqlExecutor[F, Session[F]]:
         )
         .withTypingStrategy(TypingStrategy.SearchPath)
         .single
-      _ <- Resource.make(acquireCommands.traverse_(session.execute))(_ =>
+      _ <- Resource.eval(logger.info("Sandbox connection established"))
+      _ <- Resource.make(session.execute(createSchemaCommand))(_ =>
         session.execute(dropSchemaCommand).flatMap(schemaDropped),
+      )
+      _ <- Resource.eval(
+        session.execute(searchPathCommand),
       )
     yield session
   }

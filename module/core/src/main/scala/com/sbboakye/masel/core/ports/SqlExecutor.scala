@@ -7,4 +7,4 @@ import io.circe.Json
 
 trait SqlExecutor[F[_], A]:
   def execute(setup: SetupSql, query: QuerySql): F[Json]
-  def sandbox(sql: QuerySql, id: SubmissionId, sandboxConfig: DatabaseConfig)(using F: MonadThrow[F]): Resource[F, A]
+  def sandbox(id: SubmissionId)(using F: MonadThrow[F]): Resource[F, A]
