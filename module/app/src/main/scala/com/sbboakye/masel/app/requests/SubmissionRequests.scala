@@ -1,13 +1,13 @@
 package com.sbboakye.masel.app.requests
 
-import com.sbboakye.masel.core.domain.{ChallengeId, NonEmptyString, Score}
+import com.sbboakye.masel.core.domain.{ChallengeId, NonEmptyString, QuerySql, Score}
 import io.circe.generic.semiauto.*
 import io.circe.{Decoder, Encoder}
 import io.github.iltotore.iron.circe.given
 
 case class CreateSubmissionRequest(
     challengeId: ChallengeId,
-    candidateSolution: NonEmptyString,
+    candidateSolution: QuerySql,
 )
 
 object CreateSubmissionRequest:
@@ -15,7 +15,7 @@ object CreateSubmissionRequest:
   given Decoder[CreateSubmissionRequest] = deriveDecoder[CreateSubmissionRequest]
 
 case class UpdateSubmissionRequest(
-    candidateSolution: Option[NonEmptyString],
+    candidateSolution: Option[QuerySql],
     output: Option[io.circe.Json],
     score: Option[Score],
 )

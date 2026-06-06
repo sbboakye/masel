@@ -1,6 +1,14 @@
 package com.sbboakye.masel.app.requests
 
-import com.sbboakye.masel.core.domain.{ChallengeDifficulty, ChallengeStatus, NonEmptyString, PositiveInt, given}
+import com.sbboakye.masel.core.domain.{
+  ChallengeDifficulty,
+  ChallengeStatus,
+  NonEmptyString,
+  PositiveInt,
+  QuerySql,
+  SetupSql,
+  given,
+}
 import io.circe.generic.semiauto.*
 import io.circe.{Decoder, Encoder}
 import io.github.iltotore.iron.circe.given
@@ -8,8 +16,8 @@ import io.github.iltotore.iron.circe.given
 case class CreateChallengeRequest(
     title: NonEmptyString,
     instructions: NonEmptyString,
-    setupSql: NonEmptyString,
-    expectedSolution: NonEmptyString,
+    setupSql: SetupSql,
+    expectedSolution: QuerySql,
     allottedTime: PositiveInt,
     difficulty: ChallengeDifficulty,
 )
@@ -21,9 +29,9 @@ object CreateChallengeRequest:
 case class UpdateChallengeRequest(
     title: Option[NonEmptyString],
     instructions: Option[NonEmptyString],
-    setupSql: Option[NonEmptyString],
+    setupSql: Option[SetupSql],
     status: Option[ChallengeStatus],
-    expectedSolution: Option[NonEmptyString],
+    expectedSolution: Option[QuerySql],
     output: Option[io.circe.Json],
     allottedTime: Option[PositiveInt],
     difficulty: Option[ChallengeDifficulty],
