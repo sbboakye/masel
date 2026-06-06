@@ -2,7 +2,13 @@ package com.sbboakye.masel.persistence.queries
 
 import cats.syntax.all.*
 import com.sbboakye.masel.core.domain.{NonEmptyString, Submission, SubmissionId}
-import com.sbboakye.masel.persistence.codec.SkunkCodec.{domainText, submissionCodec, submissionId, submissionScore}
+import com.sbboakye.masel.persistence.codec.SkunkCodec.{
+  domainText,
+  querySqlCodec,
+  submissionCodec,
+  submissionId,
+  submissionScore,
+}
 import io.github.iltotore.iron.*
 import io.github.iltotore.iron.constraint.all.*
 import skunk.*
@@ -54,7 +60,7 @@ object SubmissionQueries:
     sql"""
         UPDATE submissions
         SET
-            candidate_solution = $domainText,
+            candidate_solution = $querySqlCodec,
             output = ${jsonb.opt},
             score = ${submissionScore.opt},
             updated_at = $timestamptz
@@ -62,7 +68,7 @@ object SubmissionQueries:
         RETURNING id, challenge_id, candidate_solution, output, score, created_at, updated_at
       """
       .query(submissionCodec)
-      .contramap[Submission](s => (s.candidateSolution: NonEmptyString, s.output, s.score, s.updatedAt, s.id))
+      .contramap[Submission](s => (s.candidateSolution, s.output, s.score, s.updatedAt, s.id))
 
   def delete: Command[SubmissionId] =
     sql"""

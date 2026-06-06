@@ -6,5 +6,5 @@ import com.sbboakye.masel.core.domain.{DatabaseConfig, QuerySql, SetupSql, Submi
 import io.circe.Json
 
 trait SqlExecutor[F[_], A]:
-  def execute(setup: SetupSql, query: QuerySql): F[Json]
   def sandbox(id: SubmissionId)(using F: MonadThrow[F]): Resource[F, A]
+  def execute(id: SubmissionId, setup: SetupSql, query: QuerySql): F[Json]

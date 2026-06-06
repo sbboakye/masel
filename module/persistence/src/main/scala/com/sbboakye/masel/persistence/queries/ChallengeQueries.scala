@@ -8,6 +8,7 @@ import com.sbboakye.masel.core.domain.{
   ChallengeStatus,
   NonEmptyString,
   PositiveInt,
+  SetupSql,
 }
 import com.sbboakye.masel.persistence.codec.SkunkCodec.{
   challengeCodec,
@@ -17,6 +18,8 @@ import com.sbboakye.masel.persistence.codec.SkunkCodec.{
   domainPositiveInt,
   domainText,
   domainVarchar,
+  querySqlCodec,
+  setupSqlCodec,
 }
 import skunk.*
 import skunk.circe.codec.all.jsonb
@@ -76,9 +79,9 @@ object ChallengeQueries:
       UPDATE challenges
       SET title = $domainVarchar,
           instructions = $domainText,
-          setup_sql = $domainText,
+          setup_sql = $setupSqlCodec,
           status = $challengeStatus,
-          expected_solution = $domainText,
+          expected_solution = $querySqlCodec,
           output = ${jsonb.opt},
           allotted_time = $domainPositiveInt,
           difficulty = $challengeDifficulty,
@@ -91,9 +94,9 @@ object ChallengeQueries:
         (
           (c.title: NonEmptyString),
           (c.instructions: NonEmptyString),
-          (c.setupSql: NonEmptyString),
+          c.setupSql,
           c.status,
-          (c.expectedSolution: NonEmptyString),
+          c.expectedSolution,
           c.output,
           (c.allottedTime: PositiveInt),
           c.difficulty,

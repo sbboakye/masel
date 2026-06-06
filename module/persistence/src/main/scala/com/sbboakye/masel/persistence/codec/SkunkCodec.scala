@@ -7,7 +7,9 @@ import com.sbboakye.masel.core.domain.{
   ChallengeStatus,
   NonEmptyString,
   PositiveInt,
+  QuerySql,
   Score,
+  SetupSql,
   Submission,
   SubmissionId,
 }
@@ -25,6 +27,8 @@ object SkunkCodec:
   val domainVarchar: Codec[NonEmptyString] = refined[NonEmptyString](varchar)
   val domainText: Codec[NonEmptyString] = refined[NonEmptyString](text)
   val domainPositiveInt: Codec[PositiveInt] = refined[PositiveInt](int4)
+  val setupSqlCodec: Codec[SetupSql] = domainText.imap(SetupSql.apply)(SetupSql.value)
+  val querySqlCodec: Codec[QuerySql] = domainText.imap(QuerySql.apply)(QuerySql.value)
 
   // challenge codecs
   val challengeId: Codec[ChallengeId] = uuid.imap(ChallengeId.apply)(ChallengeId.value)
@@ -36,9 +40,9 @@ object SkunkCodec:
   val challengeCodecTypes = challengeId *:
     domainVarchar *:
     domainText *:
-    domainText *:
+    setupSqlCodec *:
     challengeStatus *:
-    domainText *:
+    querySqlCodec *:
     jsonb.opt *:
     domainPositiveInt *:
     challengeDifficulty *:
@@ -54,7 +58,7 @@ object SkunkCodec:
 
   val submissionCodecTypes = submissionId *:
     challengeId *:
-    domainText *:
+    querySqlCodec *:
     jsonb.opt *:
     submissionScore.opt *:
     timestamptz *:

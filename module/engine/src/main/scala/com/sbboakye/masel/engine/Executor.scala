@@ -13,6 +13,7 @@ import org.typelevel.otel4s.metrics.Meter.Implicits.noop
 import org.typelevel.otel4s.trace.Tracer.Implicits.noop
 import skunk.*
 import skunk.Session.Credentials
+import skunk.circe.codec.all.jsonb
 import skunk.data.Completion
 import skunk.implicits.*
 
@@ -26,6 +27,7 @@ class Executor[F[_]: {Async, Console, LoggerFactory}](sandboxConfig: DatabaseCon
 
     val createSchemaCommand: Command[Void] = sql"CREATE SCHEMA #$schemaName".command
     val searchPathCommand: Command[Void] = sql"SET search_path TO #$schemaName".command
+    val timeoutCommand: Command[Void] = sql"SET statement_timeout = '10s'".command
     val dropSchemaCommand: Command[Void] = sql"DROP SCHEMA #$schemaName CASCADE".command
 
     def schemaDropped(c: Completion): F[Unit] = c match
@@ -54,7 +56,17 @@ class Executor[F[_]: {Async, Console, LoggerFactory}](sandboxConfig: DatabaseCon
       _ <- Resource.eval(
         session.execute(searchPathCommand),
       )
+      _ <- Resource.eval(session.execute(timeoutCommand))
     yield session
   }
 
-  override def execute(setup: SetupSql, query: QuerySql): F[Json] = ???
+  override def execute(id: SubmissionId, setup: SetupSql, query: QuerySql): F[Json] =
+    sandbox(id).use { session =>
+      val setupCommand: Command[Void] = sql"#${setup.value}".command
+      val resultQuery: Query[Void, Json] =
+        sql"SELECT coalesce(json_agg(t), '[]'::jsonb) FROM (#${query.value}) AS t".query(jsonb)
+      for
+        _ <- session.execute(setupCommand)
+        result <- session.unique(resultQuery)
+      yield result
+    }

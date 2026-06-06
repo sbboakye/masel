@@ -5,9 +5,10 @@ import com.sbboakye.masel.core.errors.AppError.ValidationFailed
 import io.circe.{Decoder, Encoder}
 import io.github.iltotore.iron.circe.given
 
-type QuerySql = NonEmptyString
+opaque type QuerySql = NonEmptyString
 
 object QuerySql:
+  def apply(value: NonEmptyString): QuerySql = value
 
   given Encoder[QuerySql] = Encoder[NonEmptyString]
   given Decoder[QuerySql] = Decoder[NonEmptyString]
@@ -16,4 +17,4 @@ object QuerySql:
     if value.contains(";") then Left(ValidationFailed(List("Query SQL cannot contain semicolons")))
     else Right(value)
 
-  extension (sql: QuerySql) def value: String = sql
+  extension (sql: QuerySql) def value: NonEmptyString = sql
