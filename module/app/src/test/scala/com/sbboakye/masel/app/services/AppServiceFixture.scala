@@ -14,6 +14,8 @@ import com.sbboakye.masel.core.domain.{
   ChallengeId,
   ChallengeStatus,
   NonEmptyString,
+  QuerySql,
+  SetupSql,
   Submission,
   SubmissionId,
 }
@@ -30,7 +32,8 @@ trait AppServiceFixture:
   val createChallengeRequest: CreateChallengeRequest = CreateChallengeRequest(
     title = "Sum of two squares",
     instructions = "Sum two squares using SQL",
-    expectedSolution = "SELECT 1 + 4",
+    setupSql = SetupSql("CREATE TABLE t (n INT);"),
+    expectedSolution = QuerySql("SELECT 1 + 4"),
     allottedTime = 900,
     difficulty = Easy,
   )
@@ -38,6 +41,7 @@ trait AppServiceFixture:
   val emptyUpdateChallengeRequest: UpdateChallengeRequest = UpdateChallengeRequest(
     title = None,
     instructions = None,
+    setupSql = None,
     status = None,
     expectedSolution = None,
     output = None,
@@ -48,8 +52,9 @@ trait AppServiceFixture:
   val fullUpdateChallengeRequest: UpdateChallengeRequest = UpdateChallengeRequest(
     title = Some("Updated title"),
     instructions = Some("Updated instructions"),
+    setupSql = Some(SetupSql("CREATE TABLE t (n INT);")),
     status = Some(Active),
-    expectedSolution = Some("SELECT 42"),
+    expectedSolution = Some(QuerySql("SELECT 42")),
     output = Some(Json.obj("col" -> Json.fromString("v"))),
     allottedTime = Some(1200),
     difficulty = Some(Hard),
@@ -66,8 +71,9 @@ trait AppServiceFixture:
       id = id,
       title = title,
       instructions = "Some instructions",
+      setupSql = SetupSql("CREATE TABLE t (n INT);"),
       status = status,
-      expectedSolution = "SELECT 1",
+      expectedSolution = QuerySql("SELECT 1"),
       output = None,
       allottedTime = 600,
       difficulty = Medium,
@@ -78,7 +84,7 @@ trait AppServiceFixture:
   def createSubmissionRequestFor(challengeId: ChallengeId): CreateSubmissionRequest =
     CreateSubmissionRequest(
       challengeId = challengeId,
-      candidateSolution = "SELECT 1 + 4",
+      candidateSolution = QuerySql("SELECT 1 + 4"),
     )
 
   val emptyUpdateSubmissionRequest: UpdateSubmissionRequest = UpdateSubmissionRequest(
@@ -88,7 +94,7 @@ trait AppServiceFixture:
   )
 
   val fullUpdateSubmissionRequest: UpdateSubmissionRequest = UpdateSubmissionRequest(
-    candidateSolution = Some("SELECT 42 AS answer"),
+    candidateSolution = Some(QuerySql("SELECT 42 AS answer")),
     output = Some(Json.obj("answer" -> Json.fromInt(42))),
     score = Some(85),
   )
@@ -103,7 +109,7 @@ trait AppServiceFixture:
     } yield Submission(
       id = id,
       challengeId = challengeId,
-      candidateSolution = "SELECT 1",
+      candidateSolution = QuerySql("SELECT 1"),
       output = None,
       score = if withScore then Some(50) else None,
       createdAt = now,

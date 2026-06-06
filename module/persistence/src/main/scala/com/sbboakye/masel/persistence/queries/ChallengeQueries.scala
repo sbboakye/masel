@@ -71,7 +71,7 @@ object ChallengeQueries:
       VALUES (
         $challengeCodec
       )
-      RETURNING id, title, instructions, status, expected_solution, output, allotted_time, difficulty, created_at, updated_at
+      RETURNING id, title, instructions, setup_sql, status, expected_solution, output, allotted_time, difficulty, created_at, updated_at
     """.query(challengeCodec)
 
   def update: Query[Challenge, Challenge] =
@@ -87,7 +87,7 @@ object ChallengeQueries:
           difficulty = $challengeDifficulty,
           updated_at = $timestamptz
       WHERE id = $challengeId
-      RETURNING id, title, instructions, status, expected_solution, output, allotted_time, difficulty, created_at, updated_at
+      RETURNING id, title, instructions, setup_sql, status, expected_solution, output, allotted_time, difficulty, created_at, updated_at
     """
       .query(challengeCodec)
       .contramap[Challenge] { c =>

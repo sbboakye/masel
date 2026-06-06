@@ -18,8 +18,9 @@ trait CoreFixture:
       id = id,
       title = "Sum of two squares",
       instructions = "Just sum them up",
+      setupSql = SetupSql("CREATE TABLE t (n INT);"),
       status = Draft,
-      expectedSolution = "2 * 2 =",
+      expectedSolution = QuerySql("2 * 2 ="),
       output = None,
       allottedTime = 900,
       difficulty = Easy,
@@ -35,7 +36,7 @@ trait CoreFixture:
     submission = Submission(
       id = submissionId,
       challengeId = challengeId,
-      candidateSolution = "x + x = y",
+      candidateSolution = QuerySql("x + x = y"),
       output = None,
       score = None,
       createdAt = now,
@@ -49,7 +50,7 @@ trait CoreFixture:
     submission = Submission(
       id = submissionId,
       challengeId = challengeId,
-      candidateSolution = "x + x = y",
+      candidateSolution = QuerySql("x + x = y"),
       output = None,
       score = Some(90),
       createdAt = OffsetDateTime.now(),

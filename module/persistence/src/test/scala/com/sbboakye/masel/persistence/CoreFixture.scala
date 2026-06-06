@@ -4,7 +4,7 @@ import cats.*
 import cats.effect.{Clock, IO}
 import com.sbboakye.masel.core.domain.ChallengeDifficulty.Easy
 import com.sbboakye.masel.core.domain.ChallengeStatus.Draft
-import com.sbboakye.masel.core.domain.{Challenge, ChallengeId, Submission, SubmissionId}
+import com.sbboakye.masel.core.domain.{Challenge, ChallengeId, QuerySql, SetupSql, Submission, SubmissionId}
 import io.github.iltotore.iron.autoRefine
 import java.time.ZoneOffset
 
@@ -17,8 +17,9 @@ trait CoreFixture:
       id = id,
       title = "Sum of two squares",
       instructions = "Just sum them up",
+      setupSql = SetupSql("CREATE TABLE t (n INT);"),
       status = Draft,
-      expectedSolution = "2 * 2 =",
+      expectedSolution = QuerySql("2 * 2 ="),
       output = None,
       allottedTime = 900,
       difficulty = Easy,
@@ -34,8 +35,9 @@ trait CoreFixture:
       id = id,
       title = "Sum of two squares",
       instructions = "Just sum them up",
+      setupSql = SetupSql("CREATE TABLE t (n INT);"),
       status = Draft,
-      expectedSolution = "2 * 2 =",
+      expectedSolution = QuerySql("2 * 2 ="),
       output = None,
       allottedTime = 900,
       difficulty = Easy,
@@ -50,7 +52,7 @@ trait CoreFixture:
     submission = Submission(
       id = submissionId,
       challengeId = challengeId,
-      candidateSolution = "x + x = y",
+      candidateSolution = QuerySql("x + x = y"),
       output = None,
       score = None,
       createdAt = now,
@@ -64,7 +66,7 @@ trait CoreFixture:
     submission = Submission(
       id = submissionId,
       challengeId = challengeId,
-      candidateSolution = "x + x = y",
+      candidateSolution = QuerySql("x + x = y"),
       output = None,
       score = Some(90),
       createdAt = now,

@@ -174,6 +174,7 @@ class ChallengeServiceTests extends AsyncFreeSpec with AsyncIOSpec with Matchers
           val partial = UpdateChallengeRequest(
             title = Some("only the title changed"),
             instructions = None,
+            setupSql = None,
             status = Some(validatedStatus),
             expectedSolution = None,
             output = None,

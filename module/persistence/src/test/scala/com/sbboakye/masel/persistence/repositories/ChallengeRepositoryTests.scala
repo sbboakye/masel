@@ -4,7 +4,7 @@ import cats.*
 import cats.effect.testing.scalatest.AsyncIOSpec
 import cats.effect.{Clock, IO}
 import com.sbboakye.masel.core.domain.ChallengeDifficulty.Hard
-import com.sbboakye.masel.core.domain.{Challenge, ChallengeId, ChallengeStatus}
+import com.sbboakye.masel.core.domain.{Challenge, ChallengeId, ChallengeStatus, QuerySql, SetupSql}
 import com.sbboakye.masel.persistence.{CoreFixture, CoreSpec}
 import io.github.iltotore.iron.autoRefine
 import java.time.ZoneOffset
@@ -103,8 +103,9 @@ class ChallengeRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Match
                   id = randomId,
                   title = "Sum of Three Squares",
                   instructions = "sum three squares",
+                  setupSql = SetupSql("CREATE TABLE t (n INT);"),
                   status = ChallengeStatus.Draft,
-                  expectedSolution = "x + x + y = yx",
+                  expectedSolution = QuerySql("x + x + y = yx"),
                   output = None,
                   allottedTime = 600,
                   difficulty = Hard,
@@ -131,7 +132,7 @@ class ChallengeRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Match
                   title = "Sum of Three Squares",
                   instructions = "sum three squares",
                   status = ChallengeStatus.Draft,
-                  expectedSolution = "x + x + y = yx",
+                  expectedSolution = QuerySql("x + x + y = yx"),
                   output = None,
                   allottedTime = 600,
                   difficulty = Hard,

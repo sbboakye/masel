@@ -3,7 +3,7 @@ package com.sbboakye.masel.persistence.repositories
 import cats.*
 import cats.effect.testing.scalatest.AsyncIOSpec
 import cats.effect.{Clock, IO}
-import com.sbboakye.masel.core.domain.{Submission, SubmissionId}
+import com.sbboakye.masel.core.domain.{QuerySql, Submission, SubmissionId}
 import com.sbboakye.masel.persistence.{CoreFixture, CoreSpec}
 import io.github.iltotore.iron.autoRefine
 import java.time.ZoneOffset
@@ -120,7 +120,7 @@ class SubmissionRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Matc
                 submissionUpdate = Submission(
                   id = id,
                   challengeId = challengeOne.id,
-                  candidateSolution = "x + x = y + x",
+                  candidateSolution = QuerySql("x + x = y + x"),
                   output = None,
                   score = None,
                   createdAt = now,
@@ -147,7 +147,7 @@ class SubmissionRepositoryTests extends AsyncFreeSpec with AsyncIOSpec with Matc
                 submissionUpdate = submission.copy(
                   id = submission.id,
                   challengeId = challengeOne.id,
-                  candidateSolution = "x + x = y + x",
+                  candidateSolution = QuerySql("x + x = y + x"),
                   output = None,
                   score = None,
                   updatedAt = now,

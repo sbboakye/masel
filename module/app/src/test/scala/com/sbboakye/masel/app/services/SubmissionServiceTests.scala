@@ -3,7 +3,7 @@ package com.sbboakye.masel.app.services
 import cats.effect.IO
 import cats.effect.testing.scalatest.AsyncIOSpec
 import com.sbboakye.masel.app.requests.UpdateSubmissionRequest
-import com.sbboakye.masel.core.domain.{ChallengeId, SubmissionId}
+import com.sbboakye.masel.core.domain.{ChallengeId, QuerySql, SubmissionId}
 import com.sbboakye.masel.core.errors.AppError
 import io.circe.Json
 import io.github.iltotore.iron.autoRefine
@@ -188,7 +188,7 @@ class SubmissionServiceTests extends AsyncFreeSpec with AsyncIOSpec with Matcher
             seeded = base.copy(output = Some(existingOutput), score = Some(72))
             _ <- db.seedSubmission(seeded)
             partial = UpdateSubmissionRequest(
-              candidateSolution = Some("SELECT 99"),
+              candidateSolution = Some(QuerySql("SELECT 99")),
               output = None,
               score = None,
             )
